@@ -1,0 +1,17 @@
+name: Git gpg2 verify
+author: Philipp Korber <philipp@korber.dev>
+description: Verify and filter/list git tags and commits.
+branding:
+  color: green
+  icon: shield
+inputs:
+  todo:
+    description: todo
+    required: true
+    default: yaya
+outputs:
+  todo:
+    description: yay+yay
+runs:
+  using: node12
+  main: dist/index.js
