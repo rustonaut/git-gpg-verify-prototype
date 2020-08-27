@@ -32,7 +32,7 @@ export async function listTagsForCommits(commits: Iterable<string>): Promise<Set
 
 /** list all commits in the given range of commits (using rev-list and .. range) */
 export async function listCommitsInRange(start_ref: string, end_ref: string): Promise<Set<string>> {
-    let range;
+    let range
     if (start_ref == "") {
         range = end_ref
     } else {

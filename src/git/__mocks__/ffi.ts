@@ -1,5 +1,5 @@
-import { EOL } from 'os'
-import { ExecResult } from '../../utils'
+import { EOL } from "os"
+import { ExecResult } from "../../utils"
 
 /**
 Following was used to create the mock for tests:
@@ -34,28 +34,20 @@ export const CM3 = "8a57e91b2a4a14070337af9847fb4d5156aa886c"
 export const CM4 = "01292479cf8cddec4cc4ab21a3e205aaf14d95c5"
 export const CM5 = "a06dc059c714f46886a41392374f2a504b23b14f"
 export const CM6 = "59ebd4ef2e19763fd0e672a9583480df2d500f4d"
-export const COMMITS = [
-    CM1, CM2, CM3, CM4, CM5, CM6
-]
+export const COMMITS = [CM1, CM2, CM3, CM4, CM5, CM6]
 
 const LIST_ALL_TAGS_OUTPUT =
-    `barfoo${EOL}` +
-    `foobar${EOL}` +
-    `v0.0.1${EOL}` +
-    `v1.0.0${EOL}` +
-    `v1.0.1${EOL}`
-
+    `barfoo${EOL}` + `foobar${EOL}` + `v0.0.1${EOL}` + `v1.0.0${EOL}` + `v1.0.1${EOL}`
 
 let _failNextNGitCalls = 0
 
 /** cause the next n git calls to fail (n defaults to 1)*/
-export function failNextNGitCalls(n?: number) {
+export function failNextNGitCalls(n?: number): void {
     if (n == null) {
         n = 1
     }
     _failNextNGitCalls = n
 }
-
 
 /** mock for callGit with some pre-determined outputs scrapped from real git outputs */
 export async function callGit(params: string[]): Promise<ExecResult> {
@@ -68,84 +60,102 @@ export async function callGit(params: string[]): Promise<ExecResult> {
         })
     }
     switch (params[0]) {
-        case "tag":
-            if (params[1] !== "--list") {
-                throw new Error(`only support git tag --list in mock. Params: ${params}`)
+        case "tag": {
+            const res = callGitTag(params)
+            if (res !== null) {
+                return res
             }
-            if (params.length === 2) {
-                return Promise.resolve({
-                    stdout: LIST_ALL_TAGS_OUTPUT,
-                    stderr: "",
-                    exit_code: 0
-                });
+            break
+        }
+        case "rev-list": {
+            const res = callGitRevList(params)
+            if (res !== null) {
+                return res
             }
-            if (params[2] === "--points-at" && params.length === 4) {
-                const commit = params[3]
-                let mock_out = EOL
-                switch (commit) {
-                    case CM1:
-                        break;
-                    case CM2:
-                        mock_out = `foobar${EOL}barfoo${EOL}`
-                        break;
-                    case CM3:
-                        break;
-                    case CM4:
-                        mock_out = `v0.0.1${EOL}`
-                        break;
-                    case CM5:
-                        mock_out = `v1.0.0${EOL}`
-                        break;
-                    case CM6:
-                        mock_out = `v1.0.1${EOL}`
-                        break;
-                    default:
-                        throw new Error(`unknown commit ${commit}`)
-                }
-                return Promise.resolve({
-                    stdout: mock_out,
-                    stderr: "",
-                    exit_code: 0
-                })
-            }
-            break;
-        case "rev-list":
-            if (params.length != 2) {
-                break;
-            }
-            const [from, to] = params[1].split("..")
-            let from_idx;
-            let to_idx;
-            if (to == undefined) {
-                from_idx = 0
-                to_idx = COMMITS.indexOf(from) + 1
-            } else {
-                if (from == "") {
-                    from_idx = -1
-                    to_idx = -1
-                } else {
-                    from_idx = COMMITS.indexOf(from) + 1
-                    if (from_idx <= 0) {
-                        throw new Error(`malformed "from" ref for this mock: ${from}`)
-                    }
-                    if (to == "") {
-                        to_idx = COMMITS.length
-                    } else {
-                        to_idx = COMMITS.indexOf(to) + 1
-                        if (to_idx <= 0) {
-                            throw new Error(`malformed "to" ref for this mock: ${from}`)
-                        }
-                    }
-                }
-            }
-
-            const stdout = COMMITS.slice(from_idx, to_idx).join(EOL) + EOL;
-
-            return Promise.resolve({
-                stdout,
-                stderr: "",
-                exit_code: 0
-            })
+            break
+        }
     }
     throw new Error(`not supported git mock call. Params: ${params}`)
+}
+
+function callGitTag(params: string[]): Promise<ExecResult> | null {
+    if (params[1] !== "--list") {
+        throw new Error(`only support git tag --list in mock. Params: ${params}`)
+    }
+    if (params.length === 2) {
+        return Promise.resolve({
+            stdout: LIST_ALL_TAGS_OUTPUT,
+            stderr: "",
+            exit_code: 0
+        })
+    }
+    if (params[2] === "--points-at" && params.length === 4) {
+        const commit = params[3]
+        let mock_out = EOL
+        switch (commit) {
+            case CM1:
+                break
+            case CM2:
+                mock_out = `foobar${EOL}barfoo${EOL}`
+                break
+            case CM3:
+                break
+            case CM4:
+                mock_out = `v0.0.1${EOL}`
+                break
+            case CM5:
+                mock_out = `v1.0.0${EOL}`
+                break
+            case CM6:
+                mock_out = `v1.0.1${EOL}`
+                break
+            default:
+                throw new Error(`unknown commit ${commit}`)
+        }
+        return Promise.resolve({
+            stdout: mock_out,
+            stderr: "",
+            exit_code: 0
+        })
+    }
+    return null
+}
+
+function callGitRevList(params: string[]): Promise<ExecResult> | null {
+    if (params.length != 2) {
+        return null
+    }
+    const [from, to] = params[1].split("..")
+    let from_idx
+    let to_idx
+    if (to == undefined) {
+        from_idx = 0
+        to_idx = COMMITS.indexOf(from) + 1
+    } else {
+        if (from == "") {
+            from_idx = -1
+            to_idx = -1
+        } else {
+            from_idx = COMMITS.indexOf(from) + 1
+            if (from_idx <= 0) {
+                throw new Error(`malformed "from" ref for this mock: ${from}`)
+            }
+            if (to == "") {
+                to_idx = COMMITS.length
+            } else {
+                to_idx = COMMITS.indexOf(to) + 1
+                if (to_idx <= 0) {
+                    throw new Error(`malformed "to" ref for this mock: ${from}`)
+                }
+            }
+        }
+    }
+
+    const stdout = COMMITS.slice(from_idx, to_idx).join(EOL) + EOL
+
+    return Promise.resolve({
+        stdout,
+        stderr: "",
+        exit_code: 0
+    })
 }

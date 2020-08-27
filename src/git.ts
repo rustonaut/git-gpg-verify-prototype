@@ -1,1 +1,1 @@
-export * from "./git/list";
+export * from "./git/list"
