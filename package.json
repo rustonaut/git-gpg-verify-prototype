@@ -27,7 +27,9 @@
         "globals": {
             "ts-jest": {
                 "diagnostics": {
-                    "ignoreCodes": []
+                    "ignoreCodes": [
+                        "151001"
+                    ]
                 }
             }
         }

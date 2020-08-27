@@ -78,5 +78,17 @@ describe("utility module", () => {
                 "v1.0.1"
             ]))
         })
+
+        test("works with empty git out", () => {
+            const lines = EOL
+            const res = trimmedLineSet(lines)
+            expect(res).toEqual(new Set([]))
+        })
+
+        test("works with empty out", () => {
+            const lines = ""
+            const res = trimmedLineSet(lines)
+            expect(res).toEqual(new Set([]))
+        })
     })
 })

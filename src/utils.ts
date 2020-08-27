@@ -3,6 +3,9 @@ import { EOL } from "os"
 
 /** returns a set of all lines in the input, each line is trimmed */
 export function trimmedLineSet(lines: string): Set<string> {
+    if (lines.length == 0 || lines == EOL) {
+        return new Set()
+    }
     const parts = lines.split(EOL).map((s) => s.trim())
     if (lines.endsWith(EOL)) {
         // or we have a unwanted additional "",
