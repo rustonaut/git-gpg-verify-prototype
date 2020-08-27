@@ -49,6 +49,42 @@ describe("git cli ffi", () => {
             ]))
         })
     })
+
+    describe("listTagsForCommits", () => {
+        test("including commits with no, one and multiple tags", async () => {
+            const tags = await git.listTagsForCommits([
+                ffi_mock.CM2, ffi_mock.CM3, ffi_mock.CM4
+            ])
+            expect(tags).toEqual(new Set([
+                "v0.0.1",
+                "foobar",
+                "barfoo"
+            ]))
+        })
+
+        test('can handle input sets', async () => {
+            const tags = await git.listTagsForCommits(new Set([
+                ffi_mock.CM2, ffi_mock.CM3, ffi_mock.CM4
+            ]))
+            expect(tags).toEqual(new Set([
+                "v0.0.1",
+                "foobar",
+                "barfoo"
+            ]))
+        })
+
+        test('can handle an empty input list', async () => {
+            const tags = await git.listTagsForCommits([])
+            expect(tags).toEqual(new Set([]))
+        })
+
+        test('can handle duplicate inputs', async () => {
+            const tags = await git.listTagsForCommits([ffi_mock.CM4, ffi_mock.CM4]);
+            expect(tags).toEqual(new Set([
+                "v0.0.1"
+            ]))
+        })
+    })
 })
 
 

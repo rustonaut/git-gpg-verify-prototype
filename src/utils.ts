@@ -1,6 +1,20 @@
 import { exec as action_exec, ExecOptions } from "@actions/exec"
 import { EOL } from "os"
 
+/** interface for any type having an add function */
+export interface HasAdd<T> {
+    add(val: T): any;
+}
+
+/** adds all values of the second parameters to the first parameter, then returns the first parameter*/
+export function addAllTo<T>(set: HasAdd<T>, new_entries: Iterable<T>) {
+    for (const tag of new_entries) {
+        set.add(tag)
+    }
+    return set
+}
+
+
 /** returns a set of all lines in the input, each line is trimmed */
 export function trimmedLineSet(lines: string): Set<string> {
     if (lines.length == 0 || lines == EOL) {
