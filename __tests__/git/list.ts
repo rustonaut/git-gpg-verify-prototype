@@ -85,6 +85,23 @@ describe("git cli ffi", () => {
             ]))
         })
     })
+
+    describe("listCommitsInRange", () => {
+
+        test.each([
+            [ffi_mock.CM3, ffi_mock.CM6, [ffi_mock.CM4, ffi_mock.CM5, ffi_mock.CM6]],
+            [ffi_mock.CM1, ffi_mock.CM4, [ffi_mock.CM2, ffi_mock.CM3, ffi_mock.CM4]],
+            [ffi_mock.CM2, ffi_mock.CM2, []],
+            [ffi_mock.CM2, ffi_mock.CM3, [ffi_mock.CM3]],
+            [ffi_mock.CM6, ffi_mock.CM1, []],
+            [ffi_mock.CM4, "", [ffi_mock.CM5, ffi_mock.CM6]],
+            ["", ffi_mock.CM2, [ffi_mock.CM1, ffi_mock.CM2]]
+        ])("contains all commits in range: %s..%s", async (from: string, to: string, expected: string[]) => {
+            const commits = await git.listCommitsInRange(from, to)
+
+            expect(commits).toEqual(new Set(expected))
+        })
+    })
 })
 
 

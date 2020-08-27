@@ -34,6 +34,9 @@ export const CM3 = "8a57e91b2a4a14070337af9847fb4d5156aa886c"
 export const CM4 = "01292479cf8cddec4cc4ab21a3e205aaf14d95c5"
 export const CM5 = "a06dc059c714f46886a41392374f2a504b23b14f"
 export const CM6 = "59ebd4ef2e19763fd0e672a9583480df2d500f4d"
+export const COMMITS = [
+    CM1, CM2, CM3, CM4, CM5, CM6
+]
 
 const LIST_ALL_TAGS_OUTPUT =
     `barfoo${EOL}` +
@@ -105,6 +108,44 @@ export async function callGit(params: string[]): Promise<ExecResult> {
                     exit_code: 0
                 })
             }
+            break;
+        case "rev-list":
+            if (params.length != 2) {
+                break;
+            }
+            const [from, to] = params[1].split("..")
+            let from_idx;
+            let to_idx;
+            if (to == undefined) {
+                from_idx = 0
+                to_idx = COMMITS.indexOf(from) + 1
+            } else {
+                if (from == "") {
+                    from_idx = -1
+                    to_idx = -1
+                } else {
+                    from_idx = COMMITS.indexOf(from) + 1
+                    if (from_idx <= 0) {
+                        throw new Error(`malformed "from" ref for this mock: ${from}`)
+                    }
+                    if (to == "") {
+                        to_idx = COMMITS.length
+                    } else {
+                        to_idx = COMMITS.indexOf(to) + 1
+                        if (to_idx <= 0) {
+                            throw new Error(`malformed "to" ref for this mock: ${from}`)
+                        }
+                    }
+                }
+            }
+
+            const stdout = COMMITS.slice(from_idx, to_idx).join(EOL) + EOL;
+
+            return Promise.resolve({
+                stdout,
+                stderr: "",
+                exit_code: 0
+            })
     }
     throw new Error(`not supported git mock call. Params: ${params}`)
 }

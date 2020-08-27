@@ -29,3 +29,18 @@ export async function listTagsForCommits(commits: Iterable<string>): Promise<Set
     }
     return tags
 }
+
+/** list all commits in the given range of commits (using rev-list and .. range) */
+export async function listCommitsInRange(start_ref: string, end_ref: string): Promise<Set<string>> {
+    let range;
+    if (start_ref == "") {
+        range = end_ref
+    } else {
+        range = `${start_ref}..${end_ref}`
+    }
+    const out = await callGit(["rev-list", range])
+    if (out.exit_code != 0) {
+        throw new Error("Running git list commits in range failed")
+    }
+    return trimmedLineSet(out.stdout)
+}
