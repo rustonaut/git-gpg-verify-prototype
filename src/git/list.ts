@@ -1,4 +1,4 @@
-import { addAllTo, trimmedLineSet } from "../utils"
+import { addTo, trimmedLineSet } from "../utils"
 import { callGit } from "./ffi"
 
 /** list all tags for the git repo implied by the current working directory (CWD)*/
@@ -25,7 +25,7 @@ export async function listTagsForCommits(commits: Iterable<string>): Promise<Set
     const tags: Set<string> = new Set()
     for (const commit of commits) {
         const new_tags = await listTagsForCommit(commit)
-        addAllTo(tags, new_tags)
+        addTo(tags, new_tags)
     }
     return tags
 }

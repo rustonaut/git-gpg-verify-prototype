@@ -1,5 +1,5 @@
 import { EOL } from "os"
-import { addAllTo, trimmedLineSet } from "../src/utils"
+import { addTo, deleteFrom, trimmedLineSet } from "../src/utils"
 
 describe("utility module", () => {
     describe("trimmedLineSet", () => {
@@ -63,15 +63,31 @@ describe("utility module", () => {
     describe("addAllTo", () => {
         test("adds all values of second param to first param", () => {
             const set = new Set()
-            const r = addAllTo(set, new Set([1, 2, 3]))
+            const r = addTo(set, new Set([1, 2, 3]))
             expect(set).toEqual(new Set([1, 2, 3]))
             expect(set).toBe(r)
         })
 
         test("can be used with different iterables", () => {
             const set = new Set()
-            const r = addAllTo(set, [1, 2, 3])
+            const r = addTo(set, [1, 2, 3])
             expect(set).toEqual(new Set([1, 2, 3]))
+            expect(set).toBe(r)
+        })
+    })
+
+    describe("deleteAllFrom", () => {
+        test("deletes all values of second param to first param", () => {
+            const set = new Set([1, 2, 3, 4, 5])
+            const r = deleteFrom(set, new Set([1, 2, 3]))
+            expect(set).toEqual(new Set([4, 5]))
+            expect(set).toBe(r)
+        })
+
+        test("can be used with different iterables", () => {
+            const set = new Set([1, 2, 3, 4, 5])
+            const r = deleteFrom(set, [1, 2, 3])
+            expect(set).toEqual(new Set([4, 5]))
             expect(set).toBe(r)
         })
     })

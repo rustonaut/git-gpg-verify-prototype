@@ -6,10 +6,23 @@ export interface HasAdd<T> {
     add(val: T): any
 }
 
-/** adds all values of the second parameters to the first parameter, then returns the first parameter*/
-export function addAllTo<T>(set: HasAdd<T>, new_entries: Iterable<T>): HasAdd<T> {
-    for (const tag of new_entries) {
-        set.add(tag)
+/** adds all values of the second parameter to the first parameter, then returns the first parameter*/
+export function addTo<T>(set: HasAdd<T>, new_entries: Iterable<T>): HasAdd<T> {
+    for (const entry of new_entries) {
+        set.add(entry)
+    }
+    return set
+}
+
+/** interface for any type having a delete function */
+export interface HasDelete<T> {
+    delete(val: T): any
+}
+
+/** deletes all values of the second parameter from the first parameter, then return the first parameter */
+export function deleteFrom<T>(set: HasDelete<T>, remove_entries: Iterable<T>): HasDelete<T> {
+    for (const entry of remove_entries) {
+        set.delete(entry)
     }
     return set
 }
