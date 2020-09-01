@@ -1,15 +1,15 @@
-jest.mock("../src/collect")
 jest.mock("../src/git")
 
 import { mocked } from "ts-jest/utils"
-import { collectCommitsAndTags as _collectCommitsAndTags, CollectFromGitOptions } from "../src/collect"
-import { verifyCommitsAndTags as _verifyCommitsAndTags } from "../src/git"
+import {
+    collectCommitsAndTags as _collectCommitsAndTags,
+    CollectFromGitOptions, verifyCommitsAndTags as _verifyCommitsAndTags
+} from "../src/git"
 import { TrustLevel } from "../src/gpg"
 import { collectAndVerify, Options } from "../src/inner-api"
 
 const collectCommitsAndTags = mocked(_collectCommitsAndTags)
 const verifyCommitsAndTags = mocked(_verifyCommitsAndTags)
-
 
 describe("inner-api", () => {
     beforeEach(() => {
@@ -23,8 +23,7 @@ describe("inner-api", () => {
                     for_commits: {
                         explicitly_include: ["abc"],
                         include_in_range: { from_ref: "/ref/from", to_ref: "/ref/to" },
-                        explicitly_exclude: ["def"],
-
+                        explicitly_exclude: ["def"]
                     },
                     for_tags: {
                         explicitly_include: ["v0"],
@@ -57,35 +56,28 @@ describe("inner-api", () => {
             verifyCommitsAndTags.mockResolvedValueOnce([
                 new Error("hyho"),
                 new Error("duda"),
-                new Error("dumdum"),
+                new Error("dumdum")
             ])
 
             const res = await collectAndVerify(options)
 
-            expect(res.commits).toEqual(new Set([
-                "abc",
-                "hij"
-            ]))
-            expect(res.tags).toEqual(new Set([
-                "v0",
-                "v1"
-            ]))
+            expect(res.commits).toEqual(new Set(["abc", "hij"]))
+            expect(res.tags).toEqual(new Set(["v0", "v1"]))
 
             const error_msgs = new Set(res.errors.map(err => err.message))
-            expect(error_msgs).toEqual(new Set([
-                "hyho",
-                "duda",
-                "dumdum"
-            ]))
+            expect(error_msgs).toEqual(new Set(["hyho", "duda", "dumdum"]))
             expect(res.errors.length).toEqual(3)
 
             expect(collectCommitsAndTags).toHaveBeenCalledTimes(1)
             expect(collectCommitsAndTags).toHaveBeenCalledWith(options.collection)
             expect(verifyCommitsAndTags).toHaveBeenCalledTimes(1)
-            expect(verifyCommitsAndTags).toHaveBeenLastCalledWith({
-                commits: new Set(["abc", "hij"]),
-                tags: new Set(["v0", "v1"])
-            }, options.verification)
+            expect(verifyCommitsAndTags).toHaveBeenLastCalledWith(
+                {
+                    commits: new Set(["abc", "hij"]),
+                    tags: new Set(["v0", "v1"])
+                },
+                options.verification
+            )
         })
     })
 })

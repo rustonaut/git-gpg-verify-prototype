@@ -1,5 +1,4 @@
-import { collectCommitsAndTags, CollectionOptions } from "./collect"
-import { VerificationOptions, verifyCommitsAndTags } from "./git"
+import { collectCommitsAndTags, CollectionOptions, VerificationOptions, verifyCommitsAndTags } from "./git"
 
 /** the options our inner API uses */
 export interface Options {

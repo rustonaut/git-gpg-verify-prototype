@@ -1,5 +1,5 @@
-import { listAllTags, listCommitsInRange, listTagsForCommits } from "./git"
-import { addTo, deleteFrom } from "./utils"
+import { addTo, deleteFrom } from "../utils"
+import { listAllTags, listCommitsInRange, listTagsForCommits } from "./list"
 
 /** all commits and tags which have been collected */
 export interface CollectedEntities {

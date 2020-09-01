@@ -1,4 +1,4 @@
-jest.mock("../src/git")
+jest.mock("../../src/git/list")
 
 import { mocked } from "ts-jest/utils"
 import {
@@ -10,12 +10,12 @@ import {
     CommitCollectionOptions,
     filterTags,
     TagCollectionOptions
-} from "../src/collect"
+} from "../../src/git/collect"
 import {
     listAllTags as _listAllTags,
     listCommitsInRange as _listCommitsInRange,
     listTagsForCommits as _listTagsForCommits
-} from "../src/git"
+} from "../../src/git/list"
 
 const listAllTags = mocked(_listAllTags)
 const listTagsForCommits = mocked(_listTagsForCommits)
