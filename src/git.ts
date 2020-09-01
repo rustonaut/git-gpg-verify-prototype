@@ -5,7 +5,17 @@ import {
     verify
 } from "./git/verify"
 
-export { collectCommits, collectCommitsAndTags, CollectedEntities, CollectFromGitOptions, CollectionOptions, collectTags, CommitCollectionOptions, CommitRang, TagCollectionOptions } from "./git/collect"
+export {
+    collectCommits,
+    collectCommitsAndTags,
+    CollectedEntities,
+    CollectFromGitOptions,
+    CollectionOptions,
+    collectTags,
+    CommitCollectionOptions,
+    CommitRang,
+    TagCollectionOptions
+} from "./git/collect"
 export * from "./git/list"
 export { TagVerificationOptions, CommitVerificationOptions, EntityType, verify }
 

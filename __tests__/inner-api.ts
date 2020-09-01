@@ -3,7 +3,8 @@ jest.mock("../src/git")
 import { mocked } from "ts-jest/utils"
 import {
     collectCommitsAndTags as _collectCommitsAndTags,
-    CollectFromGitOptions, verifyCommitsAndTags as _verifyCommitsAndTags
+    CollectFromGitOptions,
+    verifyCommitsAndTags as _verifyCommitsAndTags
 } from "../src/git"
 import { TrustLevel } from "../src/gpg"
 import { collectAndVerify, Options } from "../src/inner-api"

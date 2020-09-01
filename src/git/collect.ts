@@ -48,7 +48,7 @@ export interface CommitCollectionOptions {
     explicitly_include: string[]
 
     /** the "range" of commits to include using `git rev-list` */
-    include_in_range: CommitRang
+    include_in_range: CommitRang | null
 
     /** commits to explicitly exclude */
     explicitly_exclude: string[]
@@ -84,10 +84,22 @@ export async function collectCommits(
     collectionOptions: CommitCollectionOptions
 ): Promise<Set<string>> {
     const commits = new Set(collectionOptions.explicitly_include)
-    const { from_ref, to_ref } = collectionOptions.include_in_range
-    addTo(commits, await listCommitsInRange(from_ref, to_ref))
+    addTo(commits, await collectCommitsFromGit(collectionOptions.include_in_range))
     deleteFrom(commits, collectionOptions.explicitly_exclude)
     return commits
+}
+
+//TODO test
+/** collect commits from git */
+export async function collectCommitsFromGit(
+    options: CommitCollectionOptions["include_in_range"]
+): Promise<Set<string>> {
+    if (options === null) {
+        return new Set()
+    } else {
+        const { from_ref, to_ref } = options
+        return await listCommitsInRange(from_ref, to_ref)
+    }
 }
 
 /** specify how tags should be collected
@@ -169,9 +181,9 @@ export function filterTags(
     tags: Set<string>,
     regex: TagCollectionOptions["filter_regex"]
 ): Set<string> {
-    if (regex !== null) {
-        return new Set([...tags].filter(tag => regex.test(tag)))
-    } else {
+    if (regex === null) {
         return tags
+    } else {
+        return new Set([...tags].filter(tag => regex.test(tag)))
     }
 }

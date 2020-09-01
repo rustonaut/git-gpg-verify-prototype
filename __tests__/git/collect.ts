@@ -4,6 +4,7 @@ import { mocked } from "ts-jest/utils"
 import {
     collectCommits,
     collectCommitsAndTags,
+    collectCommitsFromGit,
     CollectFromGitOptions,
     collectTags,
     collectTagsFromGit,
@@ -79,7 +80,7 @@ describe("collection of tags/commits", () => {
             // == "abcdef", "defg"
             const options: CommitCollectionOptions = {
                 explicitly_include: ["abcdef", "0123"],
-                include_in_range: { from_ref: "/ref/from", to_ref: "/refs/to" },
+                include_in_range: { from_ref: "/refs/from", to_ref: "/refs/to" },
                 explicitly_exclude: ["0123", "hijk"]
             }
 
@@ -90,7 +91,27 @@ describe("collection of tags/commits", () => {
             expect(res).toEqual(new Set(["abcdef", "defg"]))
             expect(listCommitsInRange).toHaveBeenCalledTimes(1)
 
-            expect(listCommitsInRange).toHaveBeenCalledWith("/ref/from", "/refs/to")
+            expect(listCommitsInRange).toHaveBeenCalledWith("/refs/from", "/refs/to")
+        })
+    })
+
+    describe("collectCommitsFromGit", () => {
+        beforeEach(() => {
+            jest.resetAllMocks()
+        })
+
+        test("if not range is given don't collect any commits", async () => {
+            const res = await collectCommitsFromGit(null)
+            expect(res).toEqual(new Set())
+        })
+
+        test("if range is given forward to listCommitsInRange", async () => {
+            listCommitsInRange.mockResolvedValueOnce(new Set(["abcde"]))
+            const res = await collectCommitsFromGit({ from_ref: "/refs/from", to_ref: "/refs/to" })
+
+            expect(res).toEqual(new Set(["abcde"]))
+            expect(listCommitsInRange).toHaveBeenCalledTimes(1)
+            expect(listCommitsInRange).toHaveBeenCalledWith("/refs/from", "/refs/to")
         })
     })
 
