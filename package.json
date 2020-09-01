@@ -13,7 +13,7 @@
         "lint": "eslint src __tests__",
         "style:check": "run-p --continue-on-error --aggregate-output format:check lint",
         "style:write": "run-p --continue-on-error --aggregate-output format:write lint",
-        "pre-commit": "run-s style:write test build",
+        "pre-commit": "run-s style:check test build",
         "test": "jest"
     },
     "husky": {
