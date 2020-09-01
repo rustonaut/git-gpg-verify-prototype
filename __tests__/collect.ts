@@ -50,8 +50,8 @@ describe("collection of tags/commits", () => {
             listTagsForCommits.mockResolvedValueOnce(new Set(["v2", "v3", "testA"]))
 
             const res = await collectCommitsAndTags({
-                tags: tag_options,
-                commits: commit_options
+                for_tags: tag_options,
+                for_commits: commit_options
             })
 
             expect(res.commits).toEqual(new Set(["abcdef", "defg"]))

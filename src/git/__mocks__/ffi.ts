@@ -50,7 +50,7 @@ export function failNextNGitCalls(n?: number): void {
 }
 
 /** mock for callGit with some pre-determined outputs scrapped from real git outputs */
-export async function callGit(params: string[]): Promise<ExecResult> {
+async function _callGit(params: string[]): Promise<ExecResult> {
     if (_failNextNGitCalls > 0) {
         _failNextNGitCalls -= 1
         return Promise.resolve({
@@ -77,6 +77,12 @@ export async function callGit(params: string[]): Promise<ExecResult> {
     }
     throw new Error(`not supported git mock call. Params: ${params}`)
 }
+
+// It's important to make this a Mock fn so that for cases
+// where we don't want to use this complex mock we can just
+// use `.mockResolvedOnce` and similar.
+const callGit = jest.fn(_callGit)
+export { callGit }
 
 function callGitTag(params: string[]): Promise<ExecResult> | null {
     if (params[1] !== "--list") {

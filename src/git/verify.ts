@@ -3,18 +3,32 @@ import { ErrorKind, Status, TrustLevel } from "../gpg/interfaces"
 import { isTrustLevelCompatibleWithMinTrustLevel } from "../gpg/trust"
 import { callGit } from "./ffi"
 
+/** Commit or Tag? */
+export enum EntityType {
+    Commit = "Commit",
+    Tag = "Tag"
+}
+
+/** verify-commit for commits and verify-tag for tags */
+export function verificationSubCommandForType(type: EntityType): string {
+    switch (type) {
+        case EntityType.Commit:
+            return "verify-commit"
+        case EntityType.Tag:
+            return "verify-tag"
+    }
+}
+
 /** inspect the signatures of a commit/tag in the git repo implied by the CWD*/
-export async function inspectSignatures(
-    type: "commit" | "tag",
-    id: string
-): Promise<GpgSignature[]> {
-    const out = await callGit([`verify-${type}`, "--raw", "--", id])
+export async function inspectSignatures(type: EntityType, id: string): Promise<GpgSignature[]> {
+    const subCmd = verificationSubCommandForType(type)
+    const out = await callGit([subCmd, "--raw", "--", id])
     //yes ignore exit_status!
     return parseRawGpgOutput(out.stderr)
 }
 
 /** Determines under which conditions signature checks fail */
-export interface VerificationOption {
+export interface VerificationOptions {
     requireMinTrustLevel: TrustLevel
     requireSignature: boolean
     ignoreUnknownKeys: boolean
@@ -23,9 +37,9 @@ export interface VerificationOption {
 
 /** verify the signatures of a commit/tag in the git repo implied by the CWD */
 export async function verify(
-    type: "commit" | "tag",
+    type: EntityType,
     id: string,
-    options: VerificationOption
+    options: VerificationOptions
 ): Promise<Error[]> {
     let signatures
     try {
@@ -44,7 +58,7 @@ export async function verify(
 /** given a list of GpgSignature results for a given commit/tag check for errors given the given options */
 export function checkSignatureList(
     signatures: GpgSignature[],
-    options: VerificationOption,
+    options: VerificationOptions,
     debug_label: string
 ): Error[] {
     if (options.ignoreUnknownKeys) {

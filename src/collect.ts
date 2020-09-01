@@ -12,8 +12,8 @@ export interface CollectedEntities {
 
 /** options about how to collect tags and commits */
 export interface CollectionOptions {
-    tags: TagCollectionOptions
-    commits: CommitCollectionOptions
+    for_tags: TagCollectionOptions
+    for_commits: CommitCollectionOptions
 }
 
 /** collect all commits and tags which needs to be checked
@@ -24,8 +24,8 @@ export interface CollectionOptions {
 export async function collectCommitsAndTags(
     collectionOptions: CollectionOptions
 ): Promise<CollectedEntities> {
-    const commits = await collectCommits(collectionOptions.commits)
-    const tags = await collectTags(collectionOptions.tags, commits)
+    const commits = await collectCommits(collectionOptions.for_commits)
+    const tags = await collectTags(collectionOptions.for_tags, commits)
     return {
         tags,
         commits

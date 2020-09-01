@@ -1,24 +1,134 @@
+jest.mock("../../src/git/ffi")
+
+import { mocked } from "ts-jest/utils"
+import { callGit as _callGit } from "../../src/git/ffi"
 import {
     checkSignature,
     checkSignatureList,
+    EntityType,
     filterOutUnknownKeys,
     filterOutUntrustyKeys,
-    VerificationOption
+    inspectSignatures,
+    VerificationOptions,
+    verificationSubCommandForType,
+    verify
 } from "../../src/git/verify"
 import { ErrorKind, GpgSignature, Status, TrustLevel } from "../../src/gpg"
+import { BAD_SIGN_ATTACK, VALID_MARGINAL_TRUST_SIG } from "../../src/gpg/__mocks__/mock_gpg_outputs"
 
-//TODO add a some tests for verify itself with mocked git
+const callGit = mocked(_callGit)
 
 describe("verify commits/tags", () => {
-    //Note: We already thoroughly tested the parsing
-    //      of git/gpg output. Because of this we
-    //      don't need to test all this variants
-    //      here but can focus on `checkSignatureList`
-    //      instead which makes testing much easier.
+    describe("verify", () => {
+        beforeEach(() => {
+            jest.resetAllMocks()
+        })
+
+        // One test is nearly enough as all components are tested properly and
+        // it just wires them together.
+        //MAYBE_TODO make another test with malformed stderr where parsing throws an error
+        //    (but this should only happen if there are bugs in gpg...)
+        test("calls inspectSignature and checks signature list", async () => {
+            callGit.mockResolvedValueOnce({
+                stdout: "",
+                stderr: BAD_SIGN_ATTACK,
+                exit_code: 0
+            })
+
+            const options: VerificationOptions = {
+                ignoreUnknownKeys: false,
+                ignoreUntrustedKeys: false,
+                requireMinTrustLevel: TrustLevel.Marginal,
+                requireSignature: false
+            }
+
+            const res = await verify(EntityType.Commit, "abcdef", options)
+
+            //TODO that is wrong it's two errors
+            expect(res[0].message).toMatch("Commit(abcdef)")
+            expect(res[0].message).toMatch(ErrorKind.BadSignature)
+            expect(res[1].message).toMatch("Commit(abcdef)")
+            expect(res[1].message).toMatch(TrustLevel.Undefined)
+            expect(res[1].message).toMatch(TrustLevel.Marginal)
+            expect(res.length).toBe(2)
+
+            expect(callGit).toHaveBeenCalledTimes(1)
+            expect(callGit).toHaveBeenCalledWith(["verify-commit", "--raw", "--", "abcdef"])
+        })
+
+        test("exceptions throwing errors are caught and handled", async () => {
+            callGit.mockRejectedValueOnce(new Error("message hy"))
+
+            const options: VerificationOptions = {
+                ignoreUnknownKeys: false,
+                ignoreUntrustedKeys: false,
+                requireMinTrustLevel: TrustLevel.Undefined,
+                requireSignature: false
+            }
+
+            const res = await verify(EntityType.Commit, "abcdef", options)
+
+            expect(res.length).toBe(1)
+            expect(res[0].message).toEqual("message hy")
+        })
+
+        test("exceptions throwing other things are caught and handled", async () => {
+            callGit.mockRejectedValueOnce("message hy")
+
+            const options: VerificationOptions = {
+                ignoreUnknownKeys: false,
+                ignoreUntrustedKeys: false,
+                requireMinTrustLevel: TrustLevel.Undefined,
+                requireSignature: false
+            }
+
+            const res = await verify(EntityType.Commit, "abcdef", options)
+
+            expect(res.length).toBe(1)
+            expect(res[0].message).toEqual("message hy")
+        })
+    })
+
+    describe("inspectSignatures", () => {
+        beforeEach(() => {
+            jest.resetAllMocks()
+        })
+
+        // One test is enough as all components are tested properly and
+        // it just wires them together.
+        test("calls git the right way and parses the output", async () => {
+            callGit.mockResolvedValueOnce({
+                stdout: "",
+                stderr: VALID_MARGINAL_TRUST_SIG,
+                exit_code: 123
+            })
+            const res = await inspectSignatures(EntityType.Tag, "v0.0.1")
+
+            expect(res).toEqual([
+                {
+                    status: Status.Valid,
+                    trust_level: TrustLevel.Marginal
+                }
+            ])
+
+            expect(callGit).toHaveBeenCalledTimes(1)
+            expect(callGit).toHaveBeenCalledWith(["verify-tag", "--raw", "--", "v0.0.1"])
+        })
+    })
+
+    describe("verificationSubCommandForType", () => {
+        test.each([
+            [EntityType.Commit, "verify-commit"],
+            [EntityType.Tag, "verify-tag"]
+        ])("%s returns %s", (type, expectedSubCmd) => {
+            const subCmd = verificationSubCommandForType(type)
+            expect(subCmd).toEqual(expectedSubCmd)
+        })
+    })
 
     describe("checkSignatureList", () => {
         test("fail if signatures are required but not given", () => {
-            const options: VerificationOption = {
+            const options: VerificationOptions = {
                 requireMinTrustLevel: TrustLevel.Marginal,
                 requireSignature: true,
                 ignoreUnknownKeys: false,
@@ -30,7 +140,7 @@ describe("verify commits/tags", () => {
             expect(res[0].message).toMatch(/requires signature/i)
         })
         test("create no error if no signature is needed and not given", () => {
-            const options: VerificationOption = {
+            const options: VerificationOptions = {
                 requireMinTrustLevel: TrustLevel.Marginal,
                 requireSignature: false,
                 ignoreUnknownKeys: false,
@@ -40,7 +150,7 @@ describe("verify commits/tags", () => {
             expect(res).toEqual([])
         })
         test("create no error if signatures are not needed but given but ignored", () => {
-            const options: VerificationOption = {
+            const options: VerificationOptions = {
                 requireMinTrustLevel: TrustLevel.Marginal,
                 requireSignature: false,
                 ignoreUnknownKeys: true,
@@ -60,7 +170,7 @@ describe("verify commits/tags", () => {
             expect(res).toEqual([])
         })
         test("create a error for each invalid signature", () => {
-            const options: VerificationOption = {
+            const options: VerificationOptions = {
                 requireMinTrustLevel: TrustLevel.Marginal,
                 requireSignature: false,
                 ignoreUnknownKeys: false,
@@ -95,7 +205,7 @@ describe("verify commits/tags", () => {
         })
 
         test("create a error for each untrusty signature", () => {
-            const options: VerificationOption = {
+            const options: VerificationOptions = {
                 requireMinTrustLevel: TrustLevel.Marginal,
                 requireSignature: false,
                 ignoreUnknownKeys: false,
@@ -132,7 +242,7 @@ describe("verify commits/tags", () => {
             expect(res[2].message).toMatch(TrustLevel.Marginal)
         })
         test("if ignore unknown keys is set don't create errors for them", () => {
-            const options: VerificationOption = {
+            const options: VerificationOptions = {
                 requireMinTrustLevel: TrustLevel.Marginal,
                 requireSignature: false,
                 ignoreUnknownKeys: true,
@@ -166,7 +276,7 @@ describe("verify commits/tags", () => {
         })
 
         test("if ignore untrusty keys is set don't create errors for them", () => {
-            const options: VerificationOption = {
+            const options: VerificationOptions = {
                 requireMinTrustLevel: TrustLevel.Marginal,
                 requireSignature: false,
                 ignoreUnknownKeys: false,
@@ -203,7 +313,7 @@ describe("verify commits/tags", () => {
         })
 
         test("error if all unknown keys are ignored but signature is required", () => {
-            const options: VerificationOption = {
+            const options: VerificationOptions = {
                 requireMinTrustLevel: TrustLevel.Marginal,
                 requireSignature: true,
                 ignoreUnknownKeys: true,
@@ -226,7 +336,7 @@ describe("verify commits/tags", () => {
         })
 
         test("error if all untrusty keys are ignored but signature is required", () => {
-            const options: VerificationOption = {
+            const options: VerificationOptions = {
                 requireMinTrustLevel: TrustLevel.Marginal,
                 requireSignature: true,
                 ignoreUnknownKeys: false,
@@ -249,7 +359,7 @@ describe("verify commits/tags", () => {
         })
 
         test("create no error if all signatures are valid", () => {
-            const options: VerificationOption = {
+            const options: VerificationOptions = {
                 requireMinTrustLevel: TrustLevel.Marginal,
                 requireSignature: true,
                 ignoreUnknownKeys: false,
