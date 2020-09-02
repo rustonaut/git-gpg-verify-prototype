@@ -3,7 +3,7 @@ jest.mock("../src/git")
 import { mocked } from "ts-jest/utils"
 import {
     collectCommitsAndTags as _collectCommitsAndTags,
-    CollectFromGitOptions,
+    CollectTagsFromGitOption,
     verifyCommitsAndTags as _verifyCommitsAndTags
 } from "../src/git"
 import { TrustLevel } from "../src/gpg"
@@ -28,7 +28,7 @@ describe("inner-api", () => {
                     },
                     for_tags: {
                         explicitly_include: ["v0"],
-                        include_from_git: CollectFromGitOptions.All,
+                        include_from_git: CollectTagsFromGitOption.All,
                         explicitly_exclude: ["v102"],
                         filter_regex: null
                     }

@@ -74,3 +74,13 @@ export async function exec(cmd: string, params: string[]): Promise<ExecResult> {
         exit_code
     }
 }
+
+/** split string once from the back */
+export function rSplitOnce(input: string, split: string): [string] | [string, string] {
+    const pos = input.lastIndexOf(split)
+    if (pos < 0) {
+        return [input]
+    }
+
+    return [input.substring(0, pos), input.substring(pos + 1)]
+}

@@ -48,7 +48,8 @@ describe("gpg functionality", () => {
             ["ULTIMATE", TrustLevel.Ultimate],
             ["marginal", TrustLevel.Marginal],
             ["Full", TrustLevel.Full],
-            ["mArgINal", TrustLevel.Marginal]
+            ["mArgINal", TrustLevel.Marginal],
+            ["malformed", null]
         ])("%s => %s", (strust_level, enum_variant) => {
             const res = trustLevelFromString(strust_level)
             expect(res).toBe(enum_variant)

@@ -1,7 +1,19 @@
 import { EOL } from "os"
-import { addTo, deleteFrom, trimmedLineSet } from "../src/utils"
+import { addTo, deleteFrom, rSplitOnce, trimmedLineSet } from "../src/utils"
 
 describe("utility module", () => {
+    describe("rsplitOnce", () => {
+        test("splits once from the back", () => {
+            const res = rSplitOnce("a.b.c.d", ".")
+            expect(res).toEqual(["a.b.c", "d"])
+        })
+
+        test("returns array of length 1 if no split exists", () => {
+            const res = rSplitOnce("a.b.c", "/")
+            expect(res).toEqual(["a.b.c"])
+        })
+    })
+
     describe("trimmedLineSet", () => {
         test("splits lines correctly", () => {
             const lines = `a1${EOL}b${EOL}c3${EOL}`

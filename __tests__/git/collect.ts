@@ -5,9 +5,9 @@ import {
     collectCommits,
     collectCommitsAndTags,
     collectCommitsFromGit,
-    CollectFromGitOptions,
     collectTags,
     collectTagsFromGit,
+    CollectTagsFromGitOption,
     CommitCollectionOptions,
     filterTags,
     TagCollectionOptions
@@ -43,7 +43,7 @@ describe("collection of tags/commits", () => {
 
             const tag_options: TagCollectionOptions = {
                 explicitly_include: ["v1", "v5"],
-                include_from_git: CollectFromGitOptions.ForCommits,
+                include_from_git: CollectTagsFromGitOption.ForCommits,
                 explicitly_exclude: ["v3", "v5"],
                 filter_regex: /v\d+/
             }
@@ -132,7 +132,7 @@ describe("collection of tags/commits", () => {
 
             const options: TagCollectionOptions = {
                 explicitly_include: ["v1", "v5"],
-                include_from_git: CollectFromGitOptions.ForCommits,
+                include_from_git: CollectTagsFromGitOption.ForCommits,
                 explicitly_exclude: ["v3", "v5"],
                 filter_regex: /v\d+/
             }
@@ -190,7 +190,7 @@ describe("collection of tags/commits", () => {
         test("None will return an empty set", async () => {
             const commits = new Set(["abcdef"])
             const _commits = new Set(commits)
-            const options = CollectFromGitOptions.None
+            const options = CollectTagsFromGitOption.None
             const res = await collectTagsFromGit(options, commits)
             expect(res).toEqual(new Set())
             expect(listAllTags).not.toHaveBeenCalled()
@@ -201,7 +201,7 @@ describe("collection of tags/commits", () => {
         test("All will return the result of listAllTags", async () => {
             const commits = new Set(["abcdef"])
             const _commits = new Set(commits)
-            const options = CollectFromGitOptions.All
+            const options = CollectTagsFromGitOption.All
             const mock_res = new Set(["v1", "v2", "v3"])
             listAllTags.mockResolvedValueOnce(mock_res)
 
@@ -216,7 +216,7 @@ describe("collection of tags/commits", () => {
         test("ForCommits will return the result of listAllTagsForCommits", async () => {
             const commits = new Set(["abcdef"])
             const _commits = new Set(commits)
-            const options = CollectFromGitOptions.ForCommits
+            const options = CollectTagsFromGitOption.ForCommits
             const mock_res = new Set(["v1"])
             listTagsForCommits.mockResolvedValueOnce(mock_res)
 

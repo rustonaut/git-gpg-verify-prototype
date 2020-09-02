@@ -125,7 +125,7 @@ export interface TagCollectionOptions {
     explicitly_include: string[]
 
     /** include all tags found through `git tags --list`  */
-    include_from_git: CollectFromGitOptions
+    include_from_git: CollectTagsFromGitOption
 
     /** exclude following tags */
     explicitly_exclude: string[]
@@ -139,7 +139,7 @@ export interface TagCollectionOptions {
 }
 
 /** how git tags should  be collected from the git repo */
-export enum CollectFromGitOptions {
+export enum CollectTagsFromGitOption {
     /** do not collect any tags from the git repo */
     None = "None",
 
@@ -163,15 +163,15 @@ export async function collectTags(
 
 /** collect tags form git */
 export async function collectTagsFromGit(
-    collectionOptions: CollectFromGitOptions,
+    collectionOptions: CollectTagsFromGitOption,
     commits: Set<string>
 ): Promise<Set<string>> {
     switch (collectionOptions) {
-        case CollectFromGitOptions.None:
+        case CollectTagsFromGitOption.None:
             return new Set()
-        case CollectFromGitOptions.All:
+        case CollectTagsFromGitOption.All:
             return await listAllTags()
-        case CollectFromGitOptions.ForCommits:
+        case CollectTagsFromGitOption.ForCommits:
             return await listTagsForCommits(commits)
     }
 }

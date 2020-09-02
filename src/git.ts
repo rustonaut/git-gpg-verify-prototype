@@ -9,9 +9,9 @@ export {
     collectCommits,
     collectCommitsAndTags,
     CollectedEntities,
-    CollectFromGitOptions,
     CollectionOptions,
     collectTags,
+    CollectTagsFromGitOption,
     CommitCollectionOptions,
     CommitRang,
     TagCollectionOptions

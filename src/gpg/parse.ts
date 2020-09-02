@@ -2,7 +2,7 @@ import { EOL } from "os"
 import { ErrorKind, GpgSignature, Status, TrustLevel } from "./interfaces"
 
 /** parses a string (case insensitive) into a TrustLevel enum variant if possible */
-export function trustLevelFromString(input: string): TrustLevel | undefined {
+export function trustLevelFromString(input: string): TrustLevel | null {
     switch (input.toUpperCase()) {
         case "NEVER":
             return TrustLevel.Never
@@ -17,7 +17,7 @@ export function trustLevelFromString(input: string): TrustLevel | undefined {
         case "ULTIMATE":
             return TrustLevel.Ultimate
         default:
-            return undefined
+            return null
     }
 }
 
@@ -133,7 +133,7 @@ export function parseRawGpgOutput(gpg_status_lines: string): GpgSignature[] {
         if (state !== undefined) {
             if (type.startsWith("TRUST_")) {
                 const trust_level = trustLevelFromString(type.substring(6))
-                if (trust_level === undefined) {
+                if (trust_level === null) {
                     console.debug("Unrecognized TrustLevel", trust_level)
                 }
                 state.setTrustLevel(trust_level ?? TrustLevel.Unknown)
