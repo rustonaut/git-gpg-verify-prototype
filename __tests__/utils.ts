@@ -1,7 +1,40 @@
 import { EOL } from "os"
-import { addTo, deleteFrom, rSplitOnce, trimmedLineSet } from "../src/utils"
+import {
+    addTo,
+    deleteFrom,
+    isString,
+    isStringArray,
+    rSplitOnce,
+    trimmedLineSet
+} from "../src/utils"
 
 describe("utility module", () => {
+    describe("isStringArray", () => {
+        test.each([
+            [[], true],
+            [["hy", "ho"], true],
+            [[1], false],
+            [["hy", 1, "ho"], false],
+            [["hy", {}, "ho"], false],
+            [[new String()], false]
+        ])("given inputs expected results %s => %s", (givenInput, expectedResult) => {
+            const res = isStringArray(givenInput)
+            expect(res).toBe(expectedResult)
+        })
+    })
+
+    describe("isString", () => {
+        test.each([
+            [1, false],
+            [{}, false],
+            ["", true],
+            [new String(), false]
+        ])("given inputs expected results %s => %s", (givenInput, expectedResult) => {
+            const res = isString(givenInput)
+            expect(res).toBe(expectedResult)
+        })
+    })
+
     describe("rsplitOnce", () => {
         test("splits once from the back", () => {
             const res = rSplitOnce("a.b.c.d", ".")

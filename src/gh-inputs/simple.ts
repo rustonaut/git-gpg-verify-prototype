@@ -3,6 +3,7 @@ import { CollectTagsFromGitOption } from "../git"
 import { CommitRang } from "../git/collect"
 import { trustLevelFromString } from "../gpg"
 import { TrustLevel } from "../gpg/interfaces"
+import { isStringArray } from "../utils"
 
 /** get's a boolean github action input from the environment */
 export function getBoolean(name: string, options?: core.InputOptions): boolean | null {
@@ -36,13 +37,19 @@ export function getTrustLevel(name: string, options?: core.InputOptions): TrustL
 }
 
 /** get's a list github action input from the environment */
-export function getList(name: string): string[] {
+export function getStringList(name: string): string[] | null {
     const val = core.getInput(name)
     if (val === "") {
-        return []
+        return null
     }
 
-    return val.split(",").map(entry => entry.trim())
+    const res = JSON.parse(val)
+
+    if (!isStringArray(res)) {
+        throw new Error(`expected array of string for ${name}`)
+    }
+
+    return res
 }
 
 /** gest a CollectTagsFromGitOption github action input from the environment */

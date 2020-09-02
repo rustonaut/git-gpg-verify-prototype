@@ -38,13 +38,13 @@ inputs:
     description: "Require all tags to be signed."
     default: true
   includedCommits:
-    description: "Explicitly include commits as comma separated list, this can be used to pipe the output of another action."
+    description: "Explicitly include commits as JSON array of commit hashes, this can be used to pipe the output of another action."
   includedTags:
-    description: "Explicitly include tags as comma separated list, this can be used to pipe the output of another action."
+    description: "Explicitly include tags as JSON array of tag name, this can be used to pipe the output of another action."
   excludedCommits:
-    description: "Explicitly exclude all commits in this comma separated list."
+    description: "Explicitly exclude all commits in this JSON array of commit hashes."
   excludedTags:
-    description: "Explicitly exclude all tags in this comma separated list."
+    description: "Explicitly exclude all tags in this JSON array of tag names."
   includeTagsFromGit:
     description: >
       How tags should be included from the git repo. Values are either of None,All,ForCommits."

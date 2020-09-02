@@ -2,9 +2,9 @@ jest.mock("../../src/gh-inputs/simple")
 
 import { mocked } from "ts-jest/utils"
 import { getCommitAndTagList, getInputForCommitsTagsAndAll } from "../../src/gh-inputs/muxed"
-import { getList as _getList } from "../../src/gh-inputs/simple"
+import { getStringList as _getStringList } from "../../src/gh-inputs/simple"
 
-const getList = mocked(_getList)
+const getStringList = mocked(_getStringList)
 
 describe("gh-inputs/muxed", () => {
     beforeEach(() => {
@@ -13,8 +13,8 @@ describe("gh-inputs/muxed", () => {
 
     describe("getInputForCommitTagList", () => {
         test("calls getList for commits and tags returning results in right order", () => {
-            getList.mockReturnValueOnce(["cmit1", "cmit2"])
-            getList.mockReturnValueOnce(["v1", "v231"])
+            getStringList.mockReturnValueOnce(["cmit1", "cmit2"])
+            getStringList.mockReturnValueOnce(["v1", "v231"])
 
             const res = getCommitAndTagList("included")
 
@@ -23,7 +23,7 @@ describe("gh-inputs/muxed", () => {
                 ["v1", "v231"]
             ])
 
-            expect(getList.mock.calls).toEqual([["includedCommits"], ["includedTags"]])
+            expect(getStringList.mock.calls).toEqual([["includedCommits"], ["includedTags"]])
         })
     })
 

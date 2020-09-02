@@ -84,3 +84,20 @@ export function rSplitOnce(input: string, split: string): [string] | [string, st
 
     return [input.substring(0, pos), input.substring(pos + 1)]
 }
+
+/** check if a value is a string or instanceof String */
+//eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export function isString(val: any): boolean {
+    return typeof val === "string"
+}
+
+/** check if a given value is an array of strings */
+//eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export function isStringArray(val: any): boolean {
+    if (!(val instanceof Array)) {
+        return false
+    }
+
+    const badIdx = val.findIndex(x => !isString(x))
+    return badIdx < 0
+}

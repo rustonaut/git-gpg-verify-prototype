@@ -1,4 +1,4 @@
-import { getList } from "./simple"
+import { getStringList } from "./simple"
 
 /** combines the baseName with the Commits/Tags suffix and returns a list input for both
  *
@@ -9,8 +9,8 @@ import { getList } from "./simple"
  *  "includedCommits" and "includedTags" as lists.
  */
 export function getCommitAndTagList(baseName: string): [string[], string[]] {
-    const commitList = getList(`${baseName}Commits`)
-    const tagList = getList(`${baseName}Tags`)
+    const commitList = getStringList(`${baseName}Commits`) ?? []
+    const tagList = getStringList(`${baseName}Tags`) ?? []
     return [commitList, tagList]
 }
 

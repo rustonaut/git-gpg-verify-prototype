@@ -367,6 +367,20 @@ function rSplitOnce(input, split) {
     }
     return [input.substring(0, pos), input.substring(pos + 1)];
 }
+/** check if a value is a string or instanceof String */
+//eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+function isString(val) {
+    return typeof val === "string";
+}
+/** check if a given value is an array of strings */
+//eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+function isStringArray(val) {
+    if (!(val instanceof Array)) {
+        return false;
+    }
+    const badIdx = val.findIndex(x => !isString(x));
+    return badIdx < 0;
+}
 
 // CONCATENATED MODULE: ./src/git/ffi.ts
 
@@ -616,6 +630,7 @@ async function verifyAll(type, ids, options) {
 
 
 
+
 /** get's a boolean github action input from the environment */
 function getBoolean(name, options) {
     const val = Object(core.getInput)(name, options);
@@ -644,12 +659,16 @@ function getTrustLevel(name, options) {
     return trustLevel;
 }
 /** get's a list github action input from the environment */
-function getList(name) {
+function getStringList(name) {
     const val = Object(core.getInput)(name);
     if (val === "") {
-        return [];
+        return null;
     }
-    return val.split(",").map(entry => entry.trim());
+    const res = JSON.parse(val);
+    if (!isStringArray(res)) {
+        throw new Error(`expected array of string for ${name}`);
+    }
+    return res;
 }
 /** gest a CollectTagsFromGitOption github action input from the environment */
 function getCollectFromGitOption() {
@@ -820,8 +839,9 @@ function lookupPredefinedRegExp(input) {
  *  "includedCommits" and "includedTags" as lists.
  */
 function getCommitAndTagList(baseName) {
-    const commitList = getList(`${baseName}Commits`);
-    const tagList = getList(`${baseName}Tags`);
+    var _a, _b;
+    const commitList = (_a = getStringList(`${baseName}Commits`)) !== null && _a !== void 0 ? _a : [];
+    const tagList = (_b = getStringList(`${baseName}Tags`)) !== null && _b !== void 0 ? _b : [];
     return [commitList, tagList];
 }
 /** call getFn on the base name and if empty on the baseName with ForCommits and ForTags prefix

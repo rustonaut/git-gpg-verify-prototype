@@ -6,8 +6,8 @@ import { mocked } from "ts-jest/utils"
 import {
     getBoolean,
     getCollectFromGitOption,
-    getList,
     getManualCommitRange,
+    getStringList,
     getTrustLevel
 } from "../../src/gh-inputs/simple"
 import { CollectTagsFromGitOption } from "../../src/git"
@@ -77,20 +77,25 @@ describe("gh-inputs/simple", () => {
         })
     })
 
-    describe("getList", () => {
+    describe("getStringList", () => {
         test.each([
-            ["", []],
-            [" ", [""]],
-            ["abcde,", ["abcde", ""]],
-            [",", ["", ""]],
-            [",,", ["", "", ""]],
-            [" a, b, c ,d,e", ["a", "b", "c", "d", "e"]]
+            ['["a","b"]', ["a", "b"]],
+            ["[]", []],
+            ["", null]
         ])("returns the expected values: %s => %s", (rawInput, expectedResult) => {
             getInput.mockReturnValueOnce(rawInput)
 
-            const res = getList("anyName")
+            const res = getStringList("anyName")
 
             expect(res).toEqual(expectedResult)
+            expect(getInput).toHaveBeenCalledWith("anyName")
+            expect(getInput).toHaveBeenCalledTimes(1)
+        })
+
+        test("passing in non string JSON values will throw an error", () => {
+            getInput.mockReturnValueOnce("[1,2]")
+
+            expect(() => getStringList("anyName")).toThrowError()
             expect(getInput).toHaveBeenCalledWith("anyName")
             expect(getInput).toHaveBeenCalledTimes(1)
         })
