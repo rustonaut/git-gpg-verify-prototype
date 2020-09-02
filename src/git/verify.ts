@@ -1,3 +1,4 @@
+import * as core from "@actions/core"
 import { GpgSignature, parseRawGpgOutput } from "../gpg"
 import { ErrorKind, Status, TrustLevel } from "../gpg/interfaces"
 import { isTrustLevelCompatibleWithMinTrustLevel } from "../gpg/trust"
@@ -91,8 +92,7 @@ export function filterOutUnknownKeys(
 ): GpgSignature[] {
     return signatures.filter(sig => {
         const keep = sig.status == Status.Valid || sig.error_kind != ErrorKind.UnknownKey
-        //TODO core.debug?
-        if (!keep) console.debug(`Ignoring unknown key signature on ${debugLabel}`)
+        if (!keep) core.debug(`Ignoring unknown key signature on ${debugLabel}`)
         return keep
     })
 }
@@ -107,7 +107,7 @@ export function filterOutUntrustyKeys(
         const keep =
             sig.status == Status.Invalid ||
             isTrustLevelCompatibleWithMinTrustLevel(sig.trust_level, minTrustLevel)
-        if (!keep) console.debug(`Ignoring untrusted signature on ${debugLabel}`)
+        if (!keep) core.debug(`Ignoring untrusted signature on ${debugLabel}`)
         return keep
     })
 }

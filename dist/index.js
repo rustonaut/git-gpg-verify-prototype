@@ -118,6 +118,7 @@ var external_os_ = __webpack_require__(87);
 // CONCATENATED MODULE: ./src/gpg/parse.ts
 
 
+
 /** parses a string (case insensitive) into a TrustLevel enum variant if possible */
 function trustLevelFromString(input) {
     switch (input.toUpperCase()) {
@@ -225,7 +226,7 @@ function parseRawGpgOutput(gpg_status_lines) {
             if (type.startsWith("TRUST_")) {
                 const trust_level = trustLevelFromString(type.substring(6));
                 if (trust_level === null) {
-                    console.debug("Unrecognized TrustLevel", trust_level);
+                    Object(core.debug)(`Unrecognized TrustLevel ${trust_level}`);
                 }
                 state.setTrustLevel(trust_level !== null && trust_level !== void 0 ? trust_level : TrustLevel.Unknown);
                 continue;
@@ -394,6 +395,7 @@ async function callGit(params) {
 
 
 
+
 /** Commit or Tag? */
 var EntityType;
 (function (EntityType) {
@@ -456,9 +458,8 @@ function checkSignatureList(signatures, options, debug_label) {
 function filterOutUnknownKeys(signatures, debugLabel) {
     return signatures.filter(sig => {
         const keep = sig.status == Status.Valid || sig.error_kind != ErrorKind.UnknownKey;
-        //TODO core.debug?
         if (!keep)
-            console.debug(`Ignoring unknown key signature on ${debugLabel}`);
+            Object(core.debug)(`Ignoring unknown key signature on ${debugLabel}`);
         return keep;
     });
 }
@@ -468,7 +469,7 @@ function filterOutUntrustyKeys(signatures, minTrustLevel, debugLabel) {
         const keep = sig.status == Status.Invalid ||
             isTrustLevelCompatibleWithMinTrustLevel(sig.trust_level, minTrustLevel);
         if (!keep)
-            console.debug(`Ignoring untrusted signature on ${debugLabel}`);
+            Object(core.debug)(`Ignoring untrusted signature on ${debugLabel}`);
         return keep;
     });
 }

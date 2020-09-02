@@ -1,3 +1,4 @@
+import * as core from "@actions/core"
 import { EOL } from "os"
 import { ErrorKind, GpgSignature, Status, TrustLevel } from "./interfaces"
 
@@ -134,7 +135,7 @@ export function parseRawGpgOutput(gpg_status_lines: string): GpgSignature[] {
             if (type.startsWith("TRUST_")) {
                 const trust_level = trustLevelFromString(type.substring(6))
                 if (trust_level === null) {
-                    console.debug("Unrecognized TrustLevel", trust_level)
+                    core.debug(`Unrecognized TrustLevel ${trust_level}`)
                 }
                 state.setTrustLevel(trust_level ?? TrustLevel.Unknown)
                 continue
