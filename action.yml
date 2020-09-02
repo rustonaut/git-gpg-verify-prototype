@@ -5,13 +5,93 @@ branding:
   color: green
   icon: shield
 inputs:
-  todo:
-    description: todo
-    required: true
-    default: yaya
+  ignoreUnknownKeys:
+    description: "Ignore all signatures which have unknown keys. For both commits and tags. (overrides the commit/tag specific options!)"
+  ignoreUnknownKeysForCommits:
+    description: "Ignore all signatures which have unknown keys. For both commits."
+    default: false
+  ignoreUnknownKeysForTags:
+    description: "Ignore all signatures which have unknown keys. For both tags."
+    default: false
+  ignoreUntrustyKeys:
+    description: "Ignore all signatures which have untrusty keys. For both commits and tags. (overrides the commit/tag specific options!)"
+  ignoreUntrustyKeysForCommits:
+    description: "Ignore all signatures which have untrusty keys. For both commits."
+    default: false
+  ignoreUntrustyKeysForTags:
+    description: "Ignore all signatures which have untrusty keys. For both tags."
+    default: false
+  requireMinTrustLevel:
+    description: "Set the minimal required trust level of keys used for signing for both commits and tags. (overrides the commit/tag specific options)"
+  requireMinTrustLevelForCommits:
+    description: "Set the minimal required trust level of keys used to sign commits."
+    default: Undefined
+  requireMinTrustLevelForTags:
+    description: "Set the minimal required trust level of keys used to sign tags."
+    default: Undefined
+  requireSignature:
+    description: "Require all commits and tags to be signed with a trust signature. (overrides the commit/tag specific options)"
+  requireSignatureForCommits:
+    description: "Require all commits to be signed."
+    default: false
+  requireSignatureForTags:
+    description: "Require all tags to be signed."
+    default: true
+  includedCommits:
+    description: "Explicitly include commits as comma separated list, this can be used to pipe the output of another action."
+  includedTags:
+    description: "Explicitly include tags as comma separated list, this can be used to pipe the output of another action."
+  excludedCommits:
+    description: "Explicitly exclude all commits in this comma separated list."
+  excludedTags:
+    description: "Explicitly exclude all tags in this comma separated list."
+  includeTagsFromGit:
+    description: >
+      How tags should be included from the git repo. Values are either of None,All,ForCommits."
+
+      - None will include no tags and can be used with includedTags to make another action decide on the tags.
+      - All will include all tags (which are returned by a `git tag --list` call)
+      - ForCommits will include all tags which are attached to an commit which is included.
+    default: ForCommits
+  includeCommitsFromGitAfter:
+    description: >
+      Use this to include all commits in the current branch after the ref passed in here.
+
+      Normally you could e.g. use `master` to get all commits since this branch/PR diverged from master.
+      But due to how the checkout action works the branch name might not work and thinks like
+      refs/remotes/origin/master might have to be used instead.
+  includeCommitsFromGitUpTo:
+    description: >
+      Use this to include all commits in the current branch up to (including) the ref passed in here.
+
+      Note that due to how the checkout action works this might not work as simple as you might think it does.
+  includePrCommits:
+    description: >
+      Use all commits from the current PR. Use this option only when triggered on a PR.
+
+      This option conflicts with includeCommitsFromGitAfter and includeCommitsFromGitUpTo.
+
+      This options will use GITHUB_BASE_REF and GITHUB_REF to get the commits of this PR using
+      some tricks to workaround the partial/thin checkout the checkout actions does.
+  filterTags:
+    description: >
+      Filter all tags to only include tags matching the given regex.
+
+      This is applied after all other options like includedTags or includeTagsFromGit.
+
+      You can provide a regex of the form /regex/flags (e.g. roughly like JS).
+
+      Alternatively you can use a predefined regex by passing in the name of the predefined regex.
+
+      Currently predefined regexes includ:
+
+      - "semver": A semver version number as defined by semver.org
+      - "v_semver": Like semver but prefixed with a "v" e.g. v1.0.2
 outputs:
-  todo:
-    description: yay+yay
+  commits:
+    description: "A comma separated list of all commits of which the signature(s) where validated"
+  tags:
+    description: "A comma separated list of all tags of which the signature(s) where validated"
 runs:
   using: node12
   main: dist/index.js
