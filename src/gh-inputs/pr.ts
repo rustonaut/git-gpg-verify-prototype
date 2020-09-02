@@ -6,9 +6,9 @@ export function getPrCommitRange(): CommitRang | null {
     if (doGetPrRange === null || doGetPrRange === false) {
         return null
     }
-    const from_ref = getFixedGithubBaseRef()
-    const to_ref = getFixedGithubRef()
-    return { from_ref, to_ref }
+    const fromRef = getFixedGithubBaseRef()
+    const toRef = getFixedGithubRef()
+    return { fromRef, toRef }
 }
 
 export function getFixedGithubBaseRef(): string {

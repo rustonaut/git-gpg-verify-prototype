@@ -91,7 +91,7 @@ export function filterOutUnknownKeys(
     debugLabel: string
 ): GpgSignature[] {
     return signatures.filter(sig => {
-        const keep = sig.status == Status.Valid || sig.error_kind != ErrorKind.UnknownKey
+        const keep = sig.status == Status.Valid || sig.errorKind != ErrorKind.UnknownKey
         if (!keep) core.debug(`Ignoring unknown key signature on ${debugLabel}`)
         return keep
     })
@@ -106,7 +106,7 @@ export function filterOutUntrustyKeys(
     return signatures.filter(sig => {
         const keep =
             sig.status == Status.Invalid ||
-            isTrustLevelCompatibleWithMinTrustLevel(sig.trust_level, minTrustLevel)
+            isTrustLevelCompatibleWithMinTrustLevel(sig.trustLevel, minTrustLevel)
         if (!keep) core.debug(`Ignoring untrusted signature on ${debugLabel}`)
         return keep
     })
@@ -119,11 +119,11 @@ export function checkSignature(
     debugLabel: string
 ): Error | true {
     if (signature.status == Status.Invalid) {
-        return new Error(`Invalid signature for ${debugLabel} because of ${signature.error_kind}`)
+        return new Error(`Invalid signature for ${debugLabel} because of ${signature.errorKind}`)
     } else {
-        if (!isTrustLevelCompatibleWithMinTrustLevel(signature.trust_level, minTrustLevel)) {
+        if (!isTrustLevelCompatibleWithMinTrustLevel(signature.trustLevel, minTrustLevel)) {
             return new Error(
-                `Valid but untrusted signature on ${debugLabel} had ${signature.trust_level} but required at least ${minTrustLevel}`
+                `Valid but untrusted signature on ${debugLabel} had ${signature.trustLevel} but required at least ${minTrustLevel}`
             )
         }
         return true

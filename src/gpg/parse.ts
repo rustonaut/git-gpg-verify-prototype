@@ -23,47 +23,47 @@ export function trustLevelFromString(input: string): TrustLevel | null {
 }
 
 class ParsingSigState {
-    input_for_error_debug_msg: string
+    inputForErrorDebugMsg: string
     trustLevel: TrustLevel | null
     errorKind: ErrorKind | null
-    foundGoodsign: boolean
+    foundGoodSig: boolean
 
-    constructor(input_for_error_debug_msg: string) {
+    constructor(inputForErrorDebugMsg: string) {
         this.trustLevel = null
         this.errorKind = null
-        this.foundGoodsign = false
-        this.input_for_error_debug_msg = input_for_error_debug_msg
+        this.foundGoodSig = false
+        this.inputForErrorDebugMsg = inputForErrorDebugMsg
     }
 
     reset(): void {
         const initalState = new ParsingSigState("")
         this.trustLevel = initalState.trustLevel
         this.errorKind = initalState.errorKind
-        this.foundGoodsign = initalState.foundGoodsign
+        this.foundGoodSig = initalState.foundGoodSig
     }
 
     toGpgSignature(): GpgSignature {
         if (this.errorKind != null) {
             return {
                 status: Status.Invalid,
-                error_kind: this.errorKind
+                errorKind: this.errorKind
             }
         }
-        if (!this.foundGoodsign) {
+        if (!this.foundGoodSig) {
             return {
                 status: Status.Invalid,
-                error_kind: ErrorKind.UnrecognizedNonGoodSignature
+                errorKind: ErrorKind.UnrecognizedNonGoodSignature
             }
         }
         if (this.trustLevel != null) {
             return {
                 status: Status.Valid,
-                trust_level: this.trustLevel
+                trustLevel: this.trustLevel
             }
         }
 
         throw new Error(
-            `gpg output contained GOODSIG but no TRUST_ entry, better not processing that:${EOL}${this.input_for_error_debug_msg}`
+            `gpg output contained GOODSIG but no TRUST_ entry, better not processing that:${EOL}${this.inputForErrorDebugMsg}`
         )
     }
 
@@ -75,7 +75,7 @@ class ParsingSigState {
             this.errorKind = errorKind
         } else {
             throw new Error(
-                `gpg output contained multiple error signals for same signature, better not processing that:${EOL}${this.input_for_error_debug_msg}`
+                `gpg output contained multiple error signals for same signature, better not processing that:${EOL}${this.inputForErrorDebugMsg}`
             )
         }
     }
@@ -85,25 +85,25 @@ class ParsingSigState {
             this.trustLevel = trustLevel
         } else {
             throw new Error(
-                `gpg output contained multiple TRUST_* signals for same signature, better not processing that:${EOL}${this.input_for_error_debug_msg}`
+                `gpg output contained multiple TRUST_* signals for same signature, better not processing that:${EOL}${this.inputForErrorDebugMsg}`
             )
         }
     }
 
     setFoundGoodSig(): void {
-        if (this.foundGoodsign === false) {
-            this.foundGoodsign = true
+        if (this.foundGoodSig === false) {
+            this.foundGoodSig = true
         } else {
             throw new Error(
-                `gpg output contained multiple GOODSIG signals for same signature, better not processing that:${EOL}${this.input_for_error_debug_msg}`
+                `gpg output contained multiple GOODSIG signals for same signature, better not processing that:${EOL}${this.inputForErrorDebugMsg}`
             )
         }
     }
 }
 
 /** parses the raw gpg output returned by e.g. git verify-commit --raw */
-export function parseRawGpgOutput(gpg_status_lines: string): GpgSignature[] {
-    const events = gpg_status_lines
+export function parseRawGpgOutput(gpgStatusLines: string): GpgSignature[] {
+    const events = gpgStatusLines
         .split(EOL)
         .filter(string => string.startsWith("[GNUPG:] "))
         .map(string => string.substring(9))
@@ -120,7 +120,7 @@ export function parseRawGpgOutput(gpg_status_lines: string): GpgSignature[] {
             const sig = state.toGpgSignature()
             signatures.push(sig)
         }
-        state = new ParsingSigState(gpg_status_lines)
+        state = new ParsingSigState(gpgStatusLines)
     }
 
     for (const event of events) {
@@ -133,11 +133,11 @@ export function parseRawGpgOutput(gpg_status_lines: string): GpgSignature[] {
 
         if (state !== undefined) {
             if (type.startsWith("TRUST_")) {
-                const trust_level = trustLevelFromString(type.substring(6))
-                if (trust_level === null) {
-                    core.debug(`Unrecognized TrustLevel ${trust_level}`)
+                const trustLevel = trustLevelFromString(type.substring(6))
+                if (trustLevel === null) {
+                    core.debug(`Unrecognized TrustLevel ${trustLevel}`)
                 }
-                state.setTrustLevel(trust_level ?? TrustLevel.Unknown)
+                state.setTrustLevel(trustLevel ?? TrustLevel.Unknown)
                 continue
             }
             switch (type) {

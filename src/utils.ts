@@ -1,4 +1,4 @@
-import { exec as action_exec, ExecOptions } from "@actions/exec"
+import { exec as actionExec, ExecOptions } from "@actions/exec"
 import { EOL } from "os"
 
 /** interface for any type having an add function */
@@ -7,8 +7,8 @@ export interface HasAdd<T> {
 }
 
 /** adds all values of the second parameter to the first parameter, then returns the first parameter*/
-export function addTo<T>(set: HasAdd<T>, new_entries: Iterable<T>): HasAdd<T> {
-    for (const entry of new_entries) {
+export function addTo<T>(set: HasAdd<T>, newEntries: Iterable<T>): HasAdd<T> {
+    for (const entry of newEntries) {
         set.add(entry)
     }
     return set
@@ -20,8 +20,8 @@ export interface HasDelete<T> {
 }
 
 /** deletes all values of the second parameter from the first parameter, then return the first parameter */
-export function deleteFrom<T>(set: HasDelete<T>, remove_entries: Iterable<T>): HasDelete<T> {
-    for (const entry of remove_entries) {
+export function deleteFrom<T>(set: HasDelete<T>, removeEntries: Iterable<T>): HasDelete<T> {
+    for (const entry of removeEntries) {
         set.delete(entry)
     }
     return set
@@ -49,7 +49,7 @@ export interface ExecResult {
     /** captured stderr */
     stderr: string
     /** exit code of running command */
-    exit_code: number
+    exitCode: number
 }
 
 /** execute a given command and capture stdout,stderr and the exit code */
@@ -66,12 +66,12 @@ export async function exec(cmd: string, params: string[]): Promise<ExecResult> {
             }
         }
     }
-    const exit_code = await action_exec(cmd, params, execOptions)
+    const exitCode = await actionExec(cmd, params, execOptions)
 
     return {
         stdout,
         stderr,
-        exit_code
+        exitCode
     }
 }
 

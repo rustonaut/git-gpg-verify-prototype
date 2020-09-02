@@ -81,8 +81,8 @@ describe("with env mocking", () => {
             const res = getPrCommitRange()
 
             expect(res).toEqual({
-                from_ref: "refs/remotes/origin/nightly",
-                to_ref: "refs/remotes/pull/15/merge"
+                fromRef: "refs/remotes/origin/nightly",
+                toRef: "refs/remotes/pull/15/merge"
             })
 
             expect(getBoolean).toHaveBeenCalledWith("includePrCommits")

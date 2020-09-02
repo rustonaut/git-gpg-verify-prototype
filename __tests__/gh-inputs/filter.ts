@@ -12,8 +12,6 @@ import {
 
 const getInput = mocked(_getInput)
 
-//TODO test RegExps ??
-
 beforeEach(() => {
     jest.resetAllMocks()
 })

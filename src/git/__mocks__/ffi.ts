@@ -56,7 +56,7 @@ async function _callGit(params: string[]): Promise<ExecResult> {
         return Promise.resolve({
             stdout: "",
             stderr: "error: Injected error",
-            exit_code: 1
+            exitCode: 1
         })
     }
     switch (params[0]) {
@@ -92,7 +92,7 @@ function callGitTag(params: string[]): Promise<ExecResult> | null {
         return Promise.resolve({
             stdout: LIST_ALL_TAGS_OUTPUT,
             stderr: "",
-            exit_code: 0
+            exitCode: 0
         })
     }
     if (params[2] === "--points-at" && params.length === 4) {
@@ -121,7 +121,7 @@ function callGitTag(params: string[]): Promise<ExecResult> | null {
         return Promise.resolve({
             stdout: mock_out,
             stderr: "",
-            exit_code: 0
+            exitCode: 0
         })
     }
     return null
@@ -132,36 +132,36 @@ function callGitRevList(params: string[]): Promise<ExecResult> | null {
         return null
     }
     const [from, to] = params[1].split("..")
-    let from_idx
-    let to_idx
+    let fromIdx
+    let toIdx
     if (to == undefined) {
-        from_idx = 0
-        to_idx = COMMITS.indexOf(from) + 1
+        fromIdx = 0
+        toIdx = COMMITS.indexOf(from) + 1
     } else {
         if (from == "") {
-            from_idx = -1
-            to_idx = -1
+            fromIdx = -1
+            toIdx = -1
         } else {
-            from_idx = COMMITS.indexOf(from) + 1
-            if (from_idx <= 0) {
+            fromIdx = COMMITS.indexOf(from) + 1
+            if (fromIdx <= 0) {
                 throw new Error(`malformed "from" ref for this mock: ${from}`)
             }
             if (to == "") {
-                to_idx = COMMITS.length
+                toIdx = COMMITS.length
             } else {
-                to_idx = COMMITS.indexOf(to) + 1
-                if (to_idx <= 0) {
+                toIdx = COMMITS.indexOf(to) + 1
+                if (toIdx <= 0) {
                     throw new Error(`malformed "to" ref for this mock: ${from}`)
                 }
             }
         }
     }
 
-    const stdout = COMMITS.slice(from_idx, to_idx).join(EOL) + EOL
+    const stdout = COMMITS.slice(fromIdx, toIdx).join(EOL) + EOL
 
     return Promise.resolve({
         stdout,
         stderr: "",
-        exit_code: 0
+        exitCode: 0
     })
 }

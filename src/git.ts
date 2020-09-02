@@ -21,8 +21,8 @@ export { TagVerificationOptions, CommitVerificationOptions, EntityType, verify }
 
 /** Options for commit and tag verification */
 export interface VerificationOptions {
-    for_tags: TagVerificationOptions
-    for_commits: CommitVerificationOptions
+    forTags: TagVerificationOptions
+    forCommits: CommitVerificationOptions
 }
 
 /** simple type containing a set of commits and tags */
@@ -40,8 +40,8 @@ export async function verifyCommitsAndTags(
     options: VerificationOptions
 ): Promise<Error[]> {
     const { tags, commits } = commitsAndTags
-    const commit_errors = await verifyAll(EntityType.Commit, commits, options.for_commits)
-    const tag_errors = await verifyAll(EntityType.Tag, tags, options.for_tags)
+    const commit_errors = await verifyAll(EntityType.Commit, commits, options.forCommits)
+    const tag_errors = await verifyAll(EntityType.Tag, tags, options.forTags)
     return commit_errors.concat(tag_errors)
 }
 

@@ -139,38 +139,38 @@ function trustLevelFromString(input) {
     }
 }
 class parse_ParsingSigState {
-    constructor(input_for_error_debug_msg) {
+    constructor(inputForErrorDebugMsg) {
         this.trustLevel = null;
         this.errorKind = null;
-        this.foundGoodsign = false;
-        this.input_for_error_debug_msg = input_for_error_debug_msg;
+        this.foundGoodSig = false;
+        this.inputForErrorDebugMsg = inputForErrorDebugMsg;
     }
     reset() {
         const initalState = new parse_ParsingSigState("");
         this.trustLevel = initalState.trustLevel;
         this.errorKind = initalState.errorKind;
-        this.foundGoodsign = initalState.foundGoodsign;
+        this.foundGoodSig = initalState.foundGoodSig;
     }
     toGpgSignature() {
         if (this.errorKind != null) {
             return {
                 status: Status.Invalid,
-                error_kind: this.errorKind
+                errorKind: this.errorKind
             };
         }
-        if (!this.foundGoodsign) {
+        if (!this.foundGoodSig) {
             return {
                 status: Status.Invalid,
-                error_kind: ErrorKind.UnrecognizedNonGoodSignature
+                errorKind: ErrorKind.UnrecognizedNonGoodSignature
             };
         }
         if (this.trustLevel != null) {
             return {
                 status: Status.Valid,
-                trust_level: this.trustLevel
+                trustLevel: this.trustLevel
             };
         }
-        throw new Error(`gpg output contained GOODSIG but no TRUST_ entry, better not processing that:${external_os_.EOL}${this.input_for_error_debug_msg}`);
+        throw new Error(`gpg output contained GOODSIG but no TRUST_ entry, better not processing that:${external_os_.EOL}${this.inputForErrorDebugMsg}`);
     }
     setErrorKind(errorKind) {
         if (this.errorKind === null ||
@@ -178,7 +178,7 @@ class parse_ParsingSigState {
             this.errorKind = errorKind;
         }
         else {
-            throw new Error(`gpg output contained multiple error signals for same signature, better not processing that:${external_os_.EOL}${this.input_for_error_debug_msg}`);
+            throw new Error(`gpg output contained multiple error signals for same signature, better not processing that:${external_os_.EOL}${this.inputForErrorDebugMsg}`);
         }
     }
     setTrustLevel(trustLevel) {
@@ -186,21 +186,21 @@ class parse_ParsingSigState {
             this.trustLevel = trustLevel;
         }
         else {
-            throw new Error(`gpg output contained multiple TRUST_* signals for same signature, better not processing that:${external_os_.EOL}${this.input_for_error_debug_msg}`);
+            throw new Error(`gpg output contained multiple TRUST_* signals for same signature, better not processing that:${external_os_.EOL}${this.inputForErrorDebugMsg}`);
         }
     }
     setFoundGoodSig() {
-        if (this.foundGoodsign === false) {
-            this.foundGoodsign = true;
+        if (this.foundGoodSig === false) {
+            this.foundGoodSig = true;
         }
         else {
-            throw new Error(`gpg output contained multiple GOODSIG signals for same signature, better not processing that:${external_os_.EOL}${this.input_for_error_debug_msg}`);
+            throw new Error(`gpg output contained multiple GOODSIG signals for same signature, better not processing that:${external_os_.EOL}${this.inputForErrorDebugMsg}`);
         }
     }
 }
 /** parses the raw gpg output returned by e.g. git verify-commit --raw */
-function parseRawGpgOutput(gpg_status_lines) {
-    const events = gpg_status_lines
+function parseRawGpgOutput(gpgStatusLines) {
+    const events = gpgStatusLines
         .split(external_os_.EOL)
         .filter(string => string.startsWith("[GNUPG:] "))
         .map(string => string.substring(9));
@@ -214,7 +214,7 @@ function parseRawGpgOutput(gpg_status_lines) {
             const sig = state.toGpgSignature();
             signatures.push(sig);
         }
-        state = new parse_ParsingSigState(gpg_status_lines);
+        state = new parse_ParsingSigState(gpgStatusLines);
     };
     for (const event of events) {
         const type = event.split(" ")[0];
@@ -224,11 +224,11 @@ function parseRawGpgOutput(gpg_status_lines) {
         }
         if (state !== undefined) {
             if (type.startsWith("TRUST_")) {
-                const trust_level = trustLevelFromString(type.substring(6));
-                if (trust_level === null) {
-                    Object(core.debug)(`Unrecognized TrustLevel ${trust_level}`);
+                const trustLevel = trustLevelFromString(type.substring(6));
+                if (trustLevel === null) {
+                    Object(core.debug)(`Unrecognized TrustLevel ${trustLevel}`);
                 }
-                state.setTrustLevel(trust_level !== null && trust_level !== void 0 ? trust_level : TrustLevel.Unknown);
+                state.setTrustLevel(trustLevel !== null && trustLevel !== void 0 ? trustLevel : TrustLevel.Unknown);
                 continue;
             }
             switch (type) {
@@ -312,15 +312,15 @@ var exec = __webpack_require__(514);
 
 
 /** adds all values of the second parameter to the first parameter, then returns the first parameter*/
-function addTo(set, new_entries) {
-    for (const entry of new_entries) {
+function addTo(set, newEntries) {
+    for (const entry of newEntries) {
         set.add(entry);
     }
     return set;
 }
 /** deletes all values of the second parameter from the first parameter, then return the first parameter */
-function deleteFrom(set, remove_entries) {
-    for (const entry of remove_entries) {
+function deleteFrom(set, removeEntries) {
+    for (const entry of removeEntries) {
         set.delete(entry);
     }
     return set;
@@ -353,11 +353,11 @@ async function utils_exec(cmd, params) {
             }
         }
     };
-    const exit_code = await Object(exec.exec)(cmd, params, execOptions);
+    const exitCode = await Object(exec.exec)(cmd, params, execOptions);
     return {
         stdout,
         stderr,
-        exit_code
+        exitCode
     };
 }
 /** split string once from the back */
@@ -457,7 +457,7 @@ function checkSignatureList(signatures, options, debug_label) {
 /** filter out all signature entries which are from unknown keys */
 function filterOutUnknownKeys(signatures, debugLabel) {
     return signatures.filter(sig => {
-        const keep = sig.status == Status.Valid || sig.error_kind != ErrorKind.UnknownKey;
+        const keep = sig.status == Status.Valid || sig.errorKind != ErrorKind.UnknownKey;
         if (!keep)
             Object(core.debug)(`Ignoring unknown key signature on ${debugLabel}`);
         return keep;
@@ -467,7 +467,7 @@ function filterOutUnknownKeys(signatures, debugLabel) {
 function filterOutUntrustyKeys(signatures, minTrustLevel, debugLabel) {
     return signatures.filter(sig => {
         const keep = sig.status == Status.Invalid ||
-            isTrustLevelCompatibleWithMinTrustLevel(sig.trust_level, minTrustLevel);
+            isTrustLevelCompatibleWithMinTrustLevel(sig.trustLevel, minTrustLevel);
         if (!keep)
             Object(core.debug)(`Ignoring untrusted signature on ${debugLabel}`);
         return keep;
@@ -476,11 +476,11 @@ function filterOutUntrustyKeys(signatures, minTrustLevel, debugLabel) {
 /** check if a specific signature causes errors under the given min trust level */
 function checkSignature(signature, minTrustLevel, debugLabel) {
     if (signature.status == Status.Invalid) {
-        return new Error(`Invalid signature for ${debugLabel} because of ${signature.error_kind}`);
+        return new Error(`Invalid signature for ${debugLabel} because of ${signature.errorKind}`);
     }
     else {
-        if (!isTrustLevelCompatibleWithMinTrustLevel(signature.trust_level, minTrustLevel)) {
-            return new Error(`Valid but untrusted signature on ${debugLabel} had ${signature.trust_level} but required at least ${minTrustLevel}`);
+        if (!isTrustLevelCompatibleWithMinTrustLevel(signature.trustLevel, minTrustLevel)) {
+            return new Error(`Valid but untrusted signature on ${debugLabel} had ${signature.trustLevel} but required at least ${minTrustLevel}`);
         }
         return true;
     }
@@ -492,15 +492,15 @@ function checkSignature(signature, minTrustLevel, debugLabel) {
 /** list all tags for the git repo implied by the current working directory (CWD)*/
 async function listAllTags() {
     const out = await callGit(["tag", "--list"]);
-    if (out.exit_code != 0) {
-        throw new Error("Running git list all tags failed");
+    if (out.exitCode != 0) {
+        throw new Error(`Running git list all tags failed ${out.exitCode}`);
     }
     return trimmedLineSet(out.stdout);
 }
 /** list all tags attached to a specific commit in the git repo implied by CWD */
 async function listTagsForCommit(commit) {
     const out = await callGit(["tag", "--list", "--points-at", commit]);
-    if (out.exit_code != 0) {
+    if (out.exitCode != 0) {
         throw new Error("Running git listTagsForCommits failed");
     }
     return trimmedLineSet(out.stdout);
@@ -509,22 +509,22 @@ async function listTagsForCommit(commit) {
 async function listTagsForCommits(commits) {
     const tags = new Set();
     for (const commit of commits) {
-        const new_tags = await listTagsForCommit(commit);
-        addTo(tags, new_tags);
+        const newTags = await listTagsForCommit(commit);
+        addTo(tags, newTags);
     }
     return tags;
 }
 /** list all commits in the given range of commits (using rev-list and .. range) */
-async function listCommitsInRange(start_ref, end_ref) {
+async function listCommitsInRange(startRef, endRef) {
     let range;
-    if (start_ref == "") {
-        range = end_ref;
+    if (startRef == "") {
+        range = endRef;
     }
     else {
-        range = `${start_ref}..${end_ref}`;
+        range = `${startRef}..${endRef}`;
     }
     const out = await callGit(["rev-list", range]);
-    if (out.exit_code != 0) {
+    if (out.exitCode != 0) {
         throw new Error("Running git list commits in range failed");
     }
     return trimmedLineSet(out.stdout);
@@ -539,8 +539,8 @@ async function listCommitsInRange(start_ref, end_ref) {
  *  the promise will be rejected.
  */
 async function collectCommitsAndTags(collectionOptions) {
-    const commits = await collectCommits(collectionOptions.for_commits);
-    const tags = await collectTags(collectionOptions.for_tags, commits);
+    const commits = await collectCommits(collectionOptions.forCommits);
+    const tags = await collectTags(collectionOptions.forTags, commits);
     return {
         tags,
         commits
@@ -548,9 +548,9 @@ async function collectCommitsAndTags(collectionOptions) {
 }
 /** collect commits */
 async function collectCommits(collectionOptions) {
-    const commits = new Set(collectionOptions.explicitly_include);
-    addTo(commits, await collectCommitsFromGit(collectionOptions.include_in_range));
-    deleteFrom(commits, collectionOptions.explicitly_exclude);
+    const commits = new Set(collectionOptions.explicitlyInclude);
+    addTo(commits, await collectCommitsFromGit(collectionOptions.includeInRange));
+    deleteFrom(commits, collectionOptions.explicitlyExclude);
     return commits;
 }
 //TODO test
@@ -560,8 +560,8 @@ async function collectCommitsFromGit(options) {
         return new Set();
     }
     else {
-        const { from_ref, to_ref } = options;
-        return await listCommitsInRange(from_ref, to_ref);
+        const { fromRef, toRef } = options;
+        return await listCommitsInRange(fromRef, toRef);
     }
 }
 /** how git tags should  be collected from the git repo */
@@ -576,10 +576,10 @@ var CollectTagsFromGitOption;
 })(CollectTagsFromGitOption || (CollectTagsFromGitOption = {}));
 /** collect tags */
 async function collectTags(collectionOptions, commits) {
-    const tags = new Set(collectionOptions.explicitly_include);
-    addTo(tags, await collectTagsFromGit(collectionOptions.include_from_git, commits));
-    deleteFrom(tags, collectionOptions.explicitly_exclude);
-    return filterTags(tags, collectionOptions.filter_regex);
+    const tags = new Set(collectionOptions.explicitlyInclude);
+    addTo(tags, await collectTagsFromGit(collectionOptions.includeFromGit, commits));
+    deleteFrom(tags, collectionOptions.explicitlyExclude);
+    return filterTags(tags, collectionOptions.filterRegex);
 }
 /** collect tags form git */
 async function collectTagsFromGit(collectionOptions, commits) {
@@ -613,8 +613,8 @@ function filterTags(tags, regex) {
 /** verify all commits and tags */
 async function verifyCommitsAndTags(commitsAndTags, options) {
     const { tags, commits } = commitsAndTags;
-    const commit_errors = await verifyAll(EntityType.Commit, commits, options.for_commits);
-    const tag_errors = await verifyAll(EntityType.Tag, tags, options.for_tags);
+    const commit_errors = await verifyAll(EntityType.Commit, commits, options.forCommits);
+    const tag_errors = await verifyAll(EntityType.Tag, tags, options.forTags);
     return commit_errors.concat(tag_errors);
 }
 /** verifies all commits/tags  in given set concatenating the lists of returned errors*/
@@ -688,12 +688,12 @@ function getCollectFromGitOption() {
 }
 /** get the manually defined commit rang github action input(s) from the environment */
 function getManualCommitRange() {
-    const from_ref = Object(core.getInput)("includeCommitsFromGitAfter");
-    const to_ref = Object(core.getInput)("includeCommitsFromGitUpTo");
-    if (from_ref === "" && to_ref === "") {
+    const fromRef = Object(core.getInput)("includeCommitsFromGitAfter");
+    const toRef = Object(core.getInput)("includeCommitsFromGitUpTo");
+    if (fromRef === "" && toRef === "") {
         return null;
     }
-    return { from_ref, to_ref };
+    return { fromRef, toRef };
 }
 
 // CONCATENATED MODULE: ./src/gh-inputs/pr.ts
@@ -703,9 +703,9 @@ function getPrCommitRange() {
     if (doGetPrRange === null || doGetPrRange === false) {
         return null;
     }
-    const from_ref = getFixedGithubBaseRef();
-    const to_ref = getFixedGithubRef();
-    return { from_ref, to_ref };
+    const fromRef = getFixedGithubBaseRef();
+    const toRef = getFixedGithubRef();
+    return { fromRef, toRef };
 }
 function getFixedGithubBaseRef() {
     const ref = process.env["GITHUB_BASE_REF"];
@@ -946,26 +946,26 @@ function parseGithubActionInputs() {
     const filterRegex = getTagFilterRegex();
     return {
         collection: {
-            for_commits: {
-                explicitly_include: includedCommits,
-                include_in_range: commitRange,
-                explicitly_exclude: excludedCommits
+            forCommits: {
+                explicitlyInclude: includedCommits,
+                includeInRange: commitRange,
+                explicitlyExclude: excludedCommits
             },
-            for_tags: {
-                explicitly_include: includedTags,
-                include_from_git: includeTagsFromGit,
-                explicitly_exclude: excludedTags,
-                filter_regex: filterRegex
+            forTags: {
+                explicitlyInclude: includedTags,
+                includeFromGit: includeTagsFromGit,
+                explicitlyExclude: excludedTags,
+                filterRegex: filterRegex
             }
         },
         verification: {
-            for_commits: {
+            forCommits: {
                 ignoreUnknownKeys: ignoreUnknownKeysForCommits,
                 ignoreUntrustedKeys: ignoreUntrustyKeysForCommits,
                 requireMinTrustLevel: requireMinTrustLevelForCommits,
                 requireSignature: requireSignatureForCommits
             },
-            for_tags: {
+            forTags: {
                 ignoreUnknownKeys: ignoreUnknownKeysForTags,
                 ignoreUntrustedKeys: ignoreUntrustyKeysForTags,
                 requireMinTrustLevel: requireMinTrustLevelForTags,
@@ -993,7 +993,7 @@ async function collectAndVerify(options) {
 
 
 /** runs the action parsing inputs, verifying tags and commits and reporting the result */
-async function run_action() {
+async function runAction() {
     const options = parseGithubActionInputs();
     const results = await collectAndVerify(options);
     for (const error of results.errors) {
@@ -1017,7 +1017,7 @@ process.on("unhandledRejection", (error) => {
     console.error("unhandled rejection", error);
     Object(core.setFailed)(`Unhandled Rejection: ${error}`);
 });
-run_action().catch((error) => {
+runAction().catch((error) => {
     console.error("unhandled exception", error);
     Object(core.setFailed)(`Unhandled Exception: ${error}`);
 });

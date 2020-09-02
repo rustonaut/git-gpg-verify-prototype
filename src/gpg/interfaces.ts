@@ -44,13 +44,13 @@ export enum TrustLevel {
 /** represents a valid GPG signature */
 export interface ValidGpgSignature {
     status: Status.Valid
-    trust_level: TrustLevel
+    trustLevel: TrustLevel
 }
 
 /** represents a invalid GPG signature (bad, no pubkey, exired, revoked etc.) */
 export interface InvalidGpgSignature {
     status: Status.Invalid
-    error_kind: ErrorKind
+    errorKind: ErrorKind
 }
 
 /** represents a GPG signature which is either valid or invalid depending on it's status value */

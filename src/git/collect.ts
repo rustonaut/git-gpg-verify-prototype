@@ -12,8 +12,8 @@ export interface CollectedEntities {
 
 /** options about how to collect tags and commits */
 export interface CollectionOptions {
-    for_tags: TagCollectionOptions
-    for_commits: CommitCollectionOptions
+    forTags: TagCollectionOptions
+    forCommits: CommitCollectionOptions
 }
 
 /** collect all commits and tags which needs to be checked
@@ -24,8 +24,8 @@ export interface CollectionOptions {
 export async function collectCommitsAndTags(
     collectionOptions: CollectionOptions
 ): Promise<CollectedEntities> {
-    const commits = await collectCommits(collectionOptions.for_commits)
-    const tags = await collectTags(collectionOptions.for_tags, commits)
+    const commits = await collectCommits(collectionOptions.forCommits)
+    const tags = await collectTags(collectionOptions.forTags, commits)
     return {
         tags,
         commits
@@ -45,28 +45,28 @@ export async function collectCommitsAndTags(
  */
 export interface CommitCollectionOptions {
     /** commits to explicitly include */
-    explicitly_include: string[]
+    explicitlyInclude: string[]
 
     /** the "range" of commits to include using `git rev-list` */
-    include_in_range: CommitRang | null
+    includeInRange: CommitRang | null
 
     /** commits to explicitly exclude */
-    explicitly_exclude: string[]
+    explicitlyExclude: string[]
 }
 
 /** A commit range roughly as used by `git rev-list`
  *
  *  This will lead to a `git rev-list` call roughly like following:
  *
- *  `git rev-list ${from_ref}..${to_ref}`
+ *  `git rev-list ${fromRef}..${toRef}`
  *
  *  Except if start_ref is "" in which case it roughly matches to:
  *
- *  `git rev-list ${to_ref}`
+ *  `git rev-list ${toRef}`
  *
  *  To produce the expected range like behavior.
  *
- *  If both `from_ref` and `to_ref` are "" a error will be returned.
+ *  If both `fromRef` and `toRef` are "" a error will be returned.
  *
  *  WARNING: The exact way the range is done might change in the future,
  *  But using something like `master..` to list all commits on this branch
@@ -74,31 +74,31 @@ export interface CommitCollectionOptions {
  */
 export interface CommitRang {
     /** the start ref which can be "" or a commit, branch or "raw" ref */
-    from_ref: string
+    fromRef: string
     /** the end ref which can be "" or commit, branch or "raw" ref */
-    to_ref: string
+    toRef: string
 }
 
 /** collect commits */
 export async function collectCommits(
     collectionOptions: CommitCollectionOptions
 ): Promise<Set<string>> {
-    const commits = new Set(collectionOptions.explicitly_include)
-    addTo(commits, await collectCommitsFromGit(collectionOptions.include_in_range))
-    deleteFrom(commits, collectionOptions.explicitly_exclude)
+    const commits = new Set(collectionOptions.explicitlyInclude)
+    addTo(commits, await collectCommitsFromGit(collectionOptions.includeInRange))
+    deleteFrom(commits, collectionOptions.explicitlyExclude)
     return commits
 }
 
 //TODO test
 /** collect commits from git */
 export async function collectCommitsFromGit(
-    options: CommitCollectionOptions["include_in_range"]
+    options: CommitCollectionOptions["includeInRange"]
 ): Promise<Set<string>> {
     if (options === null) {
         return new Set()
     } else {
-        const { from_ref, to_ref } = options
-        return await listCommitsInRange(from_ref, to_ref)
+        const { fromRef, toRef } = options
+        return await listCommitsInRange(fromRef, toRef)
     }
 }
 
@@ -122,20 +122,20 @@ export interface TagCollectionOptions {
      *
      * It's not checked if the explicitly included tags do exists!
      */
-    explicitly_include: string[]
+    explicitlyInclude: string[]
 
     /** include all tags found through `git tags --list`  */
-    include_from_git: CollectTagsFromGitOption
+    includeFromGit: CollectTagsFromGitOption
 
     /** exclude following tags */
-    explicitly_exclude: string[]
+    explicitlyExclude: string[]
 
     /** filter all found tags with given regex, THIS IS APPLIED last
      *
      *  Apply a regex on the tag *name* to determine weather or not to
      *  keep or discard it.
      */
-    filter_regex: RegExp | null
+    filterRegex: RegExp | null
 }
 
 /** how git tags should  be collected from the git repo */
@@ -155,10 +155,10 @@ export async function collectTags(
     collectionOptions: TagCollectionOptions,
     commits: Set<string>
 ): Promise<Set<string>> {
-    const tags = new Set(collectionOptions.explicitly_include)
-    addTo(tags, await collectTagsFromGit(collectionOptions.include_from_git, commits))
-    deleteFrom(tags, collectionOptions.explicitly_exclude)
-    return filterTags(tags, collectionOptions.filter_regex)
+    const tags = new Set(collectionOptions.explicitlyInclude)
+    addTo(tags, await collectTagsFromGit(collectionOptions.includeFromGit, commits))
+    deleteFrom(tags, collectionOptions.explicitlyExclude)
+    return filterTags(tags, collectionOptions.filterRegex)
 }
 
 /** collect tags form git */
@@ -179,7 +179,7 @@ export async function collectTagsFromGit(
 /* filter tags with regex */
 export function filterTags(
     tags: Set<string>,
-    regex: TagCollectionOptions["filter_regex"]
+    regex: TagCollectionOptions["filterRegex"]
 ): Set<string> {
     if (regex === null) {
         return tags

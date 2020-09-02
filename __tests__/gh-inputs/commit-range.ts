@@ -9,57 +9,55 @@ import { getManualCommitRange as _getManualCommitRange } from "../../src/gh-inpu
 const getPrCommitRange = mocked(_getPrCommitRange)
 const getManualCommitRange = mocked(_getManualCommitRange)
 
-describe("getCommitRange", () => {
-    beforeEach(() => {
-        jest.resetAllMocks()
-    })
+beforeEach(() => {
+    jest.resetAllMocks()
+})
 
-    test("return null if no commit range sources are given", () => {
-        getPrCommitRange.mockReturnValueOnce(null)
-        getManualCommitRange.mockReturnValueOnce(null)
+test("return null if no commit range sources are given", () => {
+    getPrCommitRange.mockReturnValueOnce(null)
+    getManualCommitRange.mockReturnValueOnce(null)
 
-        const res = getCommitRange()
+    const res = getCommitRange()
 
-        expect(res).toBe(null)
-        expect(getPrCommitRange).toHaveBeenCalledTimes(1)
-        expect(getManualCommitRange).toHaveBeenCalledTimes(1)
-    })
+    expect(res).toBe(null)
+    expect(getPrCommitRange).toHaveBeenCalledTimes(1)
+    expect(getManualCommitRange).toHaveBeenCalledTimes(1)
+})
 
-    test("return manual if only it is given", () => {
-        getPrCommitRange.mockReturnValueOnce(null)
-        getManualCommitRange.mockReturnValueOnce({ from_ref: "fr", to_ref: "tr" })
+test("return manual if only it is given", () => {
+    getPrCommitRange.mockReturnValueOnce(null)
+    getManualCommitRange.mockReturnValueOnce({ fromRef: "fr", toRef: "tr" })
 
-        const res = getCommitRange()
+    const res = getCommitRange()
 
-        expect(res).toEqual({ from_ref: "fr", to_ref: "tr" })
-        expect(getPrCommitRange).toHaveBeenCalledTimes(1)
-        expect(getManualCommitRange).toHaveBeenCalledTimes(1)
-    })
+    expect(res).toEqual({ fromRef: "fr", toRef: "tr" })
+    expect(getPrCommitRange).toHaveBeenCalledTimes(1)
+    expect(getManualCommitRange).toHaveBeenCalledTimes(1)
+})
 
-    test("return pr if only it is given", () => {
-        getPrCommitRange.mockReturnValueOnce({ from_ref: "fr", to_ref: "tr" })
-        getManualCommitRange.mockReturnValueOnce(null)
+test("return pr if only it is given", () => {
+    getPrCommitRange.mockReturnValueOnce({ fromRef: "fr", toRef: "tr" })
+    getManualCommitRange.mockReturnValueOnce(null)
 
-        const res = getCommitRange()
+    const res = getCommitRange()
 
-        expect(res).toEqual({ from_ref: "fr", to_ref: "tr" })
-        expect(getPrCommitRange).toHaveBeenCalledTimes(1)
-        expect(getManualCommitRange).toHaveBeenCalledTimes(1)
-    })
+    expect(res).toEqual({ fromRef: "fr", toRef: "tr" })
+    expect(getPrCommitRange).toHaveBeenCalledTimes(1)
+    expect(getManualCommitRange).toHaveBeenCalledTimes(1)
+})
 
-    test("throw error if both are given", () => {
-        getPrCommitRange.mockReturnValueOnce({ from_ref: "fr", to_ref: "tr" })
-        getManualCommitRange.mockReturnValueOnce({ from_ref: "fr2", to_ref: "tr2" })
+test("throw error if both are given", () => {
+    getPrCommitRange.mockReturnValueOnce({ fromRef: "fr", toRef: "tr" })
+    getManualCommitRange.mockReturnValueOnce({ fromRef: "fr2", toRef: "tr2" })
 
-        const exp = expect(() => getCommitRange())
-        exp.toThrowError("includePrCommits")
-        exp.toThrowError("includeCommitsFromGit")
-    })
+    const exp = expect(() => getCommitRange())
+    exp.toThrowError("includePrCommits")
+    exp.toThrowError("includeCommitsFromGit")
+})
 
-    test("throw error if both are given even if equal", () => {
-        getPrCommitRange.mockReturnValueOnce({ from_ref: "fr", to_ref: "tr" })
-        getManualCommitRange.mockReturnValueOnce({ from_ref: "fr", to_ref: "tr" })
+test("throw error if both are given even if equal", () => {
+    getPrCommitRange.mockReturnValueOnce({ fromRef: "fr", toRef: "tr" })
+    getManualCommitRange.mockReturnValueOnce({ fromRef: "fr", toRef: "tr" })
 
-        expect(() => getCommitRange()).toThrowError()
-    })
+    expect(() => getCommitRange()).toThrowError()
 })

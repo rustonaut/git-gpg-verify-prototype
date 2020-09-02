@@ -76,26 +76,26 @@ export function parseGithubActionInputs(): Options {
 
     return {
         collection: {
-            for_commits: {
-                explicitly_include: includedCommits,
-                include_in_range: commitRange,
-                explicitly_exclude: excludedCommits
+            forCommits: {
+                explicitlyInclude: includedCommits,
+                includeInRange: commitRange,
+                explicitlyExclude: excludedCommits
             },
-            for_tags: {
-                explicitly_include: includedTags,
-                include_from_git: includeTagsFromGit,
-                explicitly_exclude: excludedTags,
-                filter_regex: filterRegex
+            forTags: {
+                explicitlyInclude: includedTags,
+                includeFromGit: includeTagsFromGit,
+                explicitlyExclude: excludedTags,
+                filterRegex: filterRegex
             }
         },
         verification: {
-            for_commits: {
+            forCommits: {
                 ignoreUnknownKeys: ignoreUnknownKeysForCommits,
                 ignoreUntrustedKeys: ignoreUntrustyKeysForCommits,
                 requireMinTrustLevel: requireMinTrustLevelForCommits,
                 requireSignature: requireSignatureForCommits
             },
-            for_tags: {
+            forTags: {
                 ignoreUnknownKeys: ignoreUnknownKeysForTags,
                 ignoreUntrustedKeys: ignoreUntrustyKeysForTags,
                 requireMinTrustLevel: requireMinTrustLevelForTags,

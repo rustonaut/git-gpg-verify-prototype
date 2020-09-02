@@ -72,11 +72,11 @@ export function getCollectFromGitOption(): CollectTagsFromGitOption {
 
 /** get the manually defined commit rang github action input(s) from the environment */
 export function getManualCommitRange(): CommitRang | null {
-    const from_ref = core.getInput("includeCommitsFromGitAfter")
-    const to_ref = core.getInput("includeCommitsFromGitUpTo")
+    const fromRef = core.getInput("includeCommitsFromGitAfter")
+    const toRef = core.getInput("includeCommitsFromGitUpTo")
 
-    if (from_ref === "" && to_ref === "") {
+    if (fromRef === "" && toRef === "") {
         return null
     }
-    return { from_ref, to_ref }
+    return { fromRef, toRef }
 }

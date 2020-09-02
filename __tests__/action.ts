@@ -4,7 +4,7 @@ jest.mock("@actions/core")
 
 import * as _core from "@actions/core"
 import { mocked } from "ts-jest/utils"
-import { run_action } from "../src/action"
+import { runAction } from "../src/action"
 import { parseGithubActionInputs as _parseGithubActionInputs } from "../src/gh-inputs"
 import { CollectTagsFromGitOption } from "../src/git"
 import { TrustLevel } from "../src/gpg"
@@ -16,26 +16,26 @@ const core = mocked(_core, true)
 
 const mockOptions: Options = {
     collection: {
-        for_commits: {
-            explicitly_include: ["abc"],
-            include_in_range: { from_ref: "/ref/from", to_ref: "/ref/to" },
-            explicitly_exclude: ["def"]
+        forCommits: {
+            explicitlyInclude: ["abc"],
+            includeInRange: { fromRef: "/ref/from", toRef: "/ref/to" },
+            explicitlyExclude: ["def"]
         },
-        for_tags: {
-            explicitly_include: ["v0"],
-            include_from_git: CollectTagsFromGitOption.All,
-            explicitly_exclude: ["v102"],
-            filter_regex: null
+        forTags: {
+            explicitlyInclude: ["v0"],
+            includeFromGit: CollectTagsFromGitOption.All,
+            explicitlyExclude: ["v102"],
+            filterRegex: null
         }
     },
     verification: {
-        for_commits: {
+        forCommits: {
             ignoreUnknownKeys: false,
             ignoreUntrustedKeys: false,
             requireMinTrustLevel: TrustLevel.Marginal,
             requireSignature: false
         },
-        for_tags: {
+        forTags: {
             ignoreUnknownKeys: false,
             ignoreUntrustedKeys: false,
             requireMinTrustLevel: TrustLevel.Full,
@@ -48,9 +48,6 @@ beforeEach(() => {
     jest.resetAllMocks()
 })
 
-//TODO change includedCommits/Tags to accept JSON array instead of
-//     stringly array.
-
 describe("run_action", () => {
     test("calls the inner api with parsed inputs", async () => {
         parseGithubActionInputs.mockReturnValueOnce(mockOptions)
@@ -60,7 +57,7 @@ describe("run_action", () => {
             errors: []
         })
 
-        await run_action()
+        await runAction()
 
         expect(parseGithubActionInputs).toHaveBeenCalledTimes(1)
         expect(collectAndVerify).toHaveBeenCalledWith(mockOptions)
@@ -75,7 +72,7 @@ describe("run_action", () => {
             errors: [new Error("msg1"), new Error("msg2")]
         })
 
-        await run_action()
+        await runAction()
 
         expect(core.error.mock.calls).toEqual([["msg1"], ["msg2"]])
     })
@@ -88,7 +85,7 @@ describe("run_action", () => {
             errors: [new Error("msg1"), new Error("msg2")]
         })
 
-        await run_action()
+        await runAction()
 
         expect(core.setFailed).toHaveBeenCalledWith(
             "Signature verifications failed in at least one case."
@@ -104,7 +101,7 @@ describe("run_action", () => {
             errors: []
         })
 
-        await run_action()
+        await runAction()
 
         expect(core.setOutput).toHaveBeenCalledWith(
             "verified-commits",

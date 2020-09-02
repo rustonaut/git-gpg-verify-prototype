@@ -3,7 +3,7 @@ import { parseGithubActionInputs } from "./gh-inputs"
 import { collectAndVerify } from "./inner-api"
 
 /** runs the action parsing inputs, verifying tags and commits and reporting the result */
-export async function run_action(): Promise<void> {
+export async function runAction(): Promise<void> {
     const options = parseGithubActionInputs()
     const results = await collectAndVerify(options)
 

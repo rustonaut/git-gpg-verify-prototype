@@ -6,116 +6,114 @@ import { getStringList as _getStringList } from "../../src/gh-inputs/simple"
 
 const getStringList = mocked(_getStringList)
 
-describe("gh-inputs/muxed", () => {
-    beforeEach(() => {
-        jest.resetAllMocks()
+beforeEach(() => {
+    jest.resetAllMocks()
+})
+
+describe("getInputForCommitTagList", () => {
+    test("calls getList for commits and tags returning results in right order", () => {
+        getStringList.mockReturnValueOnce(["cmit1", "cmit2"])
+        getStringList.mockReturnValueOnce(["v1", "v231"])
+
+        const res = getCommitAndTagList("included")
+
+        expect(res).toEqual([
+            ["cmit1", "cmit2"],
+            ["v1", "v231"]
+        ])
+
+        expect(getStringList.mock.calls).toEqual([["includedCommits"], ["includedTags"]])
+    })
+})
+
+describe("getInputForCommitsTagsAndAll", () => {
+    test("use override if given", () => {
+        const getInput = jest.fn<number | null, [string]>()
+        getInput.mockReturnValueOnce(42)
+        const res = getInputForCommitsTagsAndAll("footBar", getInput, 32)
+
+        expect(res).toEqual([42, 42])
+        expect(getInput).toHaveBeenCalledWith("footBar")
+        expect(getInput).toHaveBeenCalledTimes(1)
     })
 
-    describe("getInputForCommitTagList", () => {
-        test("calls getList for commits and tags returning results in right order", () => {
-            getStringList.mockReturnValueOnce(["cmit1", "cmit2"])
-            getStringList.mockReturnValueOnce(["v1", "v231"])
+    test("if no override query tag and commit values", () => {
+        const getInput = jest.fn<number | null, [string]>()
+        getInput.mockReturnValueOnce(null)
+        getInput.mockReturnValueOnce(12)
+        getInput.mockReturnValueOnce(21)
 
-            const res = getCommitAndTagList("included")
+        const res = getInputForCommitsTagsAndAll("barFoot", getInput, 32)
 
-            expect(res).toEqual([
-                ["cmit1", "cmit2"],
-                ["v1", "v231"]
-            ])
-
-            expect(getStringList.mock.calls).toEqual([["includedCommits"], ["includedTags"]])
-        })
+        expect(res).toEqual([12, 21])
+        expect(getInput.mock.calls).toEqual([
+            ["barFoot"],
+            ["barFootForCommits"],
+            ["barFootForTags"]
+        ])
     })
 
-    describe("getInputForCommitsTagsAndAll", () => {
-        test("use override if given", () => {
-            const getInput = jest.fn<number | null, [string]>()
-            getInput.mockReturnValueOnce(42)
-            const res = getInputForCommitsTagsAndAll("footBar", getInput, 32)
+    test("use default for tags", () => {
+        const getInput = jest.fn<number | null, [string]>()
+        getInput.mockReturnValueOnce(null)
+        getInput.mockReturnValueOnce(12)
+        getInput.mockReturnValueOnce(null)
 
-            expect(res).toEqual([42, 42])
-            expect(getInput).toHaveBeenCalledWith("footBar")
-            expect(getInput).toHaveBeenCalledTimes(1)
-        })
+        const res = getInputForCommitsTagsAndAll("barFoot", getInput, [42, 32])
 
-        test("if no override query tag and commit values", () => {
-            const getInput = jest.fn<number | null, [string]>()
-            getInput.mockReturnValueOnce(null)
-            getInput.mockReturnValueOnce(12)
-            getInput.mockReturnValueOnce(21)
+        expect(res).toEqual([12, 32])
+        expect(getInput.mock.calls).toEqual([
+            ["barFoot"],
+            ["barFootForCommits"],
+            ["barFootForTags"]
+        ])
+    })
 
-            const res = getInputForCommitsTagsAndAll("barFoot", getInput, 32)
+    test("use shared default for tags", () => {
+        const getInput = jest.fn<number | null, [string]>()
+        getInput.mockReturnValueOnce(null)
+        getInput.mockReturnValueOnce(12)
+        getInput.mockReturnValueOnce(null)
 
-            expect(res).toEqual([12, 21])
-            expect(getInput.mock.calls).toEqual([
-                ["barFoot"],
-                ["barFootForCommits"],
-                ["barFootForTags"]
-            ])
-        })
+        const res = getInputForCommitsTagsAndAll("barFoot", getInput, 32)
 
-        test("use default for tags", () => {
-            const getInput = jest.fn<number | null, [string]>()
-            getInput.mockReturnValueOnce(null)
-            getInput.mockReturnValueOnce(12)
-            getInput.mockReturnValueOnce(null)
+        expect(res).toEqual([12, 32])
+        expect(getInput.mock.calls).toEqual([
+            ["barFoot"],
+            ["barFootForCommits"],
+            ["barFootForTags"]
+        ])
+    })
 
-            const res = getInputForCommitsTagsAndAll("barFoot", getInput, [42, 32])
+    test("use default for commits", () => {
+        const getInput = jest.fn<number | null, [string]>()
+        getInput.mockReturnValueOnce(null)
+        getInput.mockReturnValueOnce(null)
+        getInput.mockReturnValueOnce(21)
 
-            expect(res).toEqual([12, 32])
-            expect(getInput.mock.calls).toEqual([
-                ["barFoot"],
-                ["barFootForCommits"],
-                ["barFootForTags"]
-            ])
-        })
+        const res = getInputForCommitsTagsAndAll("barFoot", getInput, [23, 32])
 
-        test("use shared default for tags", () => {
-            const getInput = jest.fn<number | null, [string]>()
-            getInput.mockReturnValueOnce(null)
-            getInput.mockReturnValueOnce(12)
-            getInput.mockReturnValueOnce(null)
+        expect(res).toEqual([23, 21])
+        expect(getInput.mock.calls).toEqual([
+            ["barFoot"],
+            ["barFootForCommits"],
+            ["barFootForTags"]
+        ])
+    })
 
-            const res = getInputForCommitsTagsAndAll("barFoot", getInput, 32)
+    test("use shared default for commits", () => {
+        const getInput = jest.fn<number | null, [string]>()
+        getInput.mockReturnValueOnce(null)
+        getInput.mockReturnValueOnce(null)
+        getInput.mockReturnValueOnce(21)
 
-            expect(res).toEqual([12, 32])
-            expect(getInput.mock.calls).toEqual([
-                ["barFoot"],
-                ["barFootForCommits"],
-                ["barFootForTags"]
-            ])
-        })
+        const res = getInputForCommitsTagsAndAll("barFoot", getInput, 22)
 
-        test("use default for commits", () => {
-            const getInput = jest.fn<number | null, [string]>()
-            getInput.mockReturnValueOnce(null)
-            getInput.mockReturnValueOnce(null)
-            getInput.mockReturnValueOnce(21)
-
-            const res = getInputForCommitsTagsAndAll("barFoot", getInput, [23, 32])
-
-            expect(res).toEqual([23, 21])
-            expect(getInput.mock.calls).toEqual([
-                ["barFoot"],
-                ["barFootForCommits"],
-                ["barFootForTags"]
-            ])
-        })
-
-        test("use shared default for commits", () => {
-            const getInput = jest.fn<number | null, [string]>()
-            getInput.mockReturnValueOnce(null)
-            getInput.mockReturnValueOnce(null)
-            getInput.mockReturnValueOnce(21)
-
-            const res = getInputForCommitsTagsAndAll("barFoot", getInput, 22)
-
-            expect(res).toEqual([22, 21])
-            expect(getInput.mock.calls).toEqual([
-                ["barFoot"],
-                ["barFootForCommits"],
-                ["barFootForTags"]
-            ])
-        })
+        expect(res).toEqual([22, 21])
+        expect(getInput.mock.calls).toEqual([
+            ["barFoot"],
+            ["barFootForCommits"],
+            ["barFootForTags"]
+        ])
     })
 })
